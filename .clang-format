@@ -7,3 +7,4 @@ BreakBeforeBinaryOperators: false
 IndentWidth: 4
 SortIncludes: false
 NamespaceIndentation: Inner
+BreakBeforeBraces: Allman
