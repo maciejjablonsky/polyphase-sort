@@ -2,18 +2,18 @@
 #include <charconv>
 #include <fmt/format.h>
 #include <iostream>
+#include "Record.hpp"
 TapeGenerator::TapeGenerator(const int argc, const char *argv[]) : argv_{argv + 1, argv + argc}
 {
     auto records_number = GetNumberOfRecordsToGenerate();
     auto out_file_path = GetOuputFilePath();
-    if (records_number && out_file_path)
-    {
-        fmt::print("Generating tape with {} records in \"{}\" file.\n", *records_number, *out_file_path);
-    }
-    else
+    if (!records_number || !out_file_path)
     {
         fmt::print("Usage: tape_generator {} <number> [{} <file path>]\n", RECORD_NUM_COMMAND, OUTPUT_FILE_COMMAND);
+        throw std::runtime_error("Invalid arguments.");
     }
+    number_of_records_ = *records_number;
+    out_file_path_ = *out_file_path;
 }
 
 std::optional<int> TapeGenerator::GetNumberOfRecordsToGenerate() const
@@ -37,4 +37,8 @@ std::optional<std::string_view> TapeGenerator::GetOuputFilePath() const
         return std::nullopt;
     }
     return std::make_optional(*(command_iter + 1));
+}
+
+void TapeGenerator::Generate() const
+{
 }
