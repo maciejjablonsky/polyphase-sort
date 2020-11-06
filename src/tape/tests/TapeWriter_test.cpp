@@ -22,7 +22,7 @@ TEST(TapeWriterTest, sunny_scenario_WriteRecordsToFile)
     std::vector<Record::SerializedRecord> reference_records = {{5}, {4}, {3}, {2}, {1},
                                                                {5}, {4}, {3}, {2}, {1}};
     auto records_from_file =
-        FileTools::read_file<Record::SerializedRecord>(path);
+        FileTools::ReadFileWithBinaryArray<Record::SerializedRecord>(path);
     ASSERT_EQ(records_from_file.size(), reference_records.size());
     EXPECT_EQ(records_from_file, reference_records);
 }
