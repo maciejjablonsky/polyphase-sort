@@ -2,6 +2,11 @@
 #include <ctime>
 #include <random>
 
+bool Record::operator==(const Record::SerializedRecord &lhs, const Record::SerializedRecord &rhs)
+{
+    return lhs.time_since_epoch == rhs.time_since_epoch;
+}
+
 Record::RuntimeRecord Record::GetRandom()
 {
     return {std::rand()};

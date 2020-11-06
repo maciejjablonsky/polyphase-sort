@@ -8,18 +8,23 @@ TapeWriter::TapeWriter(const std::string_view tape_path, int disk_page_size)
 
 void TapeWriter::Write(std::vector<Record::SerializedRecord> &&serialized_records)
 {
-    vectors_of_serialized_records_.push_back(std::move(serialized_records));
+    records_vector_buffer_.push_back(std::move(serialized_records));
 }
 
+void TapeWriter::Flush()
+{
+    for(const auto & records : records_vector_buffer_)
+    {
+        tape_stream_.write(reinterpret_cast<const char *>(records.data()),
+                           factory_funcs::vectorsizeof(records));
+    }
+    records_vector_buffer_.clear();
+}
 
 TapeWriter::~TapeWriter()
 {
     if (tape_stream_.good())
     {
-        for (const auto &records_vector : vectors_of_serialized_records_)
-        {
-            tape_stream_.write(reinterpret_cast<const char *>(records_vector.data()), factory_funcs::vectorsizeof(records_vector));
-        }
+        Flush();
     }
 }
-
