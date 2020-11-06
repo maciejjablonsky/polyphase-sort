@@ -3,14 +3,17 @@
 #include <factory_functions.hpp>
 #include <filetools.hpp>
 #include <fmt/format.h>
-#include <ctime>
-class TapeWriterTest : public ::testing::Test
+#include <chrono>
+
+auto Timestamp()
 {
-};
+    using namespace std::chrono;
+    return duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
+}
 
 TEST(TapeWriterTest, sunny_scenario_WriteRecordsToFile)
 {
-    const std::string path = fmt::format("tmp_{}.records", time(NULL));
+    const std::string path = fmt::format("tmp_{}.records",  Timestamp());
 
     // additional scope for RAII
     {
@@ -26,3 +29,4 @@ TEST(TapeWriterTest, sunny_scenario_WriteRecordsToFile)
     ASSERT_EQ(records_from_file.size(), reference_records.size());
     EXPECT_EQ(records_from_file, reference_records);
 }
+
