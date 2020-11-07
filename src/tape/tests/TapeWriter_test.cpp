@@ -4,14 +4,13 @@
 #include <filetools.hpp>
 #include <fmt/format.h>
 #include "TapeHeaders.hpp"
-
-using byte_vector = std::vector<std::byte>;
-
+#include "byte.hpp"
+#include "TestConfig.hpp"
 
 
 TEST(TapeWriterTest, sunny_scenario_WriteRecordsToFile)
 {
-    const std::string path = fmt::format("tmp_{}.records", Timestamp());
+    const std::string path = TestConfig::GetTmpFilePath(); 
 
     // additional scope for RAII
     {

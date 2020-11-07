@@ -3,10 +3,11 @@
 #include <filetools.hpp>
 #include <fmt/format.h>
 #include <vector>
+#include "TestConfig.hpp"
 
 TEST(PageWriterTest, sunny_scenario_BytesLengthNotExceeding)
 {
-    const std::string tape_path = fmt::format("tmp_{}.records", Timestamp());
+    const std::string tape_path = TestConfig::GetTmpFilePath(); 
     const auto page_size = 4;
     PageWriter writer(tape_path, page_size);
     byte_vector dummy_bytes{0x1_byte, 0x2_byte, 0x3_byte, 0x4_byte};
@@ -16,7 +17,7 @@ TEST(PageWriterTest, sunny_scenario_BytesLengthNotExceeding)
 
 TEST(PageWriterTest, BytesLengthExceedPageSize)
 {
-    const std::string tape_path = fmt::format("tmp_{}.records", Timestamp());
+    const std::string tape_path = TestConfig::GetTmpFilePath();
     const auto page_size = 4;
     PageWriter writer(tape_path, page_size);
     byte_vector dummy_bytes{0x1_byte, 0x2_byte, 0x3_byte, 0x4_byte, 0x5_byte};
@@ -26,7 +27,7 @@ TEST(PageWriterTest, BytesLengthExceedPageSize)
 
 TEST(PageWriterTest, DriveAccessCounterWorks)
 {
-    const std::string tape_path = fmt::format("tmp_{}.records", Timestamp());
+    const std::string tape_path = TestConfig::GetTmpFilePath();
     const auto page_size = 4;
     PageWriter writer(tape_path, page_size);
     byte_vector dummy_bytes{0x1_byte, 0x2_byte, 0x3_byte, 0x4_byte};
