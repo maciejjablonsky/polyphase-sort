@@ -1,6 +1,6 @@
 set(TARGET_NAME tape_test)
-add_executable(${TARGET_NAME}  main.cpp Record_test.cpp TapeWriter_test.cpp)
-target_link_libraries(${TARGET_NAME} tape gtest fmt)
+add_executable(${TARGET_NAME}  main.cpp Record_test.cpp TapeWriter_test.cpp PageWriter_test.cpp)
+target_link_libraries(${TARGET_NAME} tape gtest fmt common)
 add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME})
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER Tests)
 
