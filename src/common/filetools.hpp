@@ -3,7 +3,7 @@
 #include <vector>
 #include <string_view>
 #include <iterator>
-namespace FileTools
+namespace 
 {
 template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_view file_path)
 {
@@ -19,6 +19,8 @@ template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_v
     }
     return {};
 }
+
+
 } // namespace FileTools
 
 #endif // FILETOOLS_HPP

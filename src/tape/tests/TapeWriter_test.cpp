@@ -3,17 +3,14 @@
 #include <factory_functions.hpp>
 #include <filetools.hpp>
 #include <fmt/format.h>
-#include <chrono>
+#include "TapeHeaders.hpp"
+#include "byte.hpp"
+#include "TestConfig.hpp"
 
-auto Timestamp()
-{
-    using namespace std::chrono;
-    return duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
-}
 
 TEST(TapeWriterTest, sunny_scenario_WriteRecordsToFile)
 {
-    const std::string path = fmt::format("tmp_{}.records",  Timestamp());
+    const std::string path = TestConfig::GetTmpFilePath(); 
 
     // additional scope for RAII
     {
@@ -24,9 +21,7 @@ TEST(TapeWriterTest, sunny_scenario_WriteRecordsToFile)
     }
     std::vector<Record::SerializedRecord> reference_records = {{5}, {4}, {3}, {2}, {1},
                                                                {5}, {4}, {3}, {2}, {1}};
-    auto records_from_file =
-        FileTools::ReadFileWithBinaryArray<Record::SerializedRecord>(path);
+    auto records_from_file = ReadFileWithBinaryArray<Record::SerializedRecord>(path);
     ASSERT_EQ(records_from_file.size(), reference_records.size());
     EXPECT_EQ(records_from_file, reference_records);
 }
-
