@@ -3,7 +3,6 @@
 #include <vector>
 #include <string_view>
 #include <iterator>
-#include <chrono>
 namespace 
 {
 template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_view file_path)
@@ -21,11 +20,6 @@ template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_v
     return {};
 }
 
-auto Timestamp()
-{
-    using namespace std::chrono;
-    return duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
-}
 
 } // namespace FileTools
 

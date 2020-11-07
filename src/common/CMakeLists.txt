@@ -1,4 +1,4 @@
-set(SOURCES factory_functions.hpp filetools.hpp byte.hpp)
+set(SOURCES factory_functions.hpp filetools.hpp byte.hpp dummy.cpp)
 add_library(common ${SOURCES})
 target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(common PROPERTIES LINKER_LANGUAGE CXX)
