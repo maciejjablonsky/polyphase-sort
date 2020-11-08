@@ -26,3 +26,11 @@ TEST(PageReaderTest, sunny_scenario_ReadPage)
     EXPECT_TRUE(memcmp(page.data(), reference.data(), page_size) ==
                 0);
 }
+
+TEST(PageReaderTest, sunny_scenario_PagesInFileNumber)
+{
+    const auto in_tape_path = TestConfig::GetResourcePath() + "tape_page_size_36_pages_2_records_7.records";
+    const int page_size = 36;
+    PageReader reader(in_tape_path, page_size);
+    EXPECT_EQ(reader.PagesInTapeFile(), 2);
+}

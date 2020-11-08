@@ -13,6 +13,7 @@ class PageReader : public IHardDriveAccessor
     bool WasLastPageRead() const;
     int GetHardDriveAccessesNumber() const override;
     int PageSize() const;
+    int PagesInTapeFile() const;
 
   private:
     mutable std::ifstream in_tape_file_;
