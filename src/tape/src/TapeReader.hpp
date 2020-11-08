@@ -5,7 +5,6 @@
 #include <string_view>
 #include "Record.hpp"
 #include <optional>
-#include <ranges>
 
 class TapeReader
 {
@@ -19,9 +18,6 @@ class TapeReader
       public:
         iterator(std::byte *page_beginning, TapeReader &parent);
         iterator &operator++();
-        //iterator &operator++(int);
-        // iterator &operator--();
-        // iterator &operator--(int);
         tape_item &operator*();
         friend bool operator==(const iterator &lhs, const iterator &rhs);
         friend bool operator!=(const iterator &lhs, const iterator &rhs);
@@ -37,7 +33,7 @@ class TapeReader
         TapeReader &tape_reader_;
         int bytes_offset_ = 0;
         int current_page_idx_ = 0;
-        tape_item *ptr_ = nullptr; // end iterator has initial value as nullptr
+        tape_item *ptr_ = nullptr;
         Record::SerializedRecord *last_ = nullptr;
     };
 

@@ -2,8 +2,8 @@
 #include "TapeReader.hpp"
 #include "TestConfig.hpp"
 #include <fmt/format.h>
-#include <ranges>
-
+#include <cstring>
+#include <algorithm>
 TEST(TapeReaderTest, sunny_scenario_EndOfTapeReached)
 {
     const std::string tape_path = TestConfig::GetResourcePath() + "page_size_40_pages_2_records_7.records";
@@ -39,4 +39,10 @@ TEST(TapeReaderIteratorsTest, DISABLED_sunny_scenario_CopyAllRecords)
     TapeReader reader(tape_path, 40);
     std::vector<Record::SerializedRecord> references = {{1}, {2}, {3}, {4}, {5}, {6}, {7}};
     std::vector<Record::SerializedRecord> copied;
+    std::copy_n(references.begin(), references.size(), copied.begin());
+    for (int i = 0; i < references.size(); ++i)
+    {
+        EXPECT_EQ(references.at(i), copied.at(i));
+    }
 }
+
