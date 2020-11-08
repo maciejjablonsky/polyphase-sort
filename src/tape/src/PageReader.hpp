@@ -3,14 +3,13 @@
 
 #include <IHardDriveAccessor.hpp>
 #include <string_view>
-#include "byte.hpp"
 #include <fstream>
-
+#include "Page.hpp"
 class PageReader : public IHardDriveAccessor
 {
   public:
     PageReader(const std::string_view in_tape_file_path, const int page_size);
-    byte_vector ReadPage();
+    Page ReadPage();
     int GetHardDriveAccessesNumber() const override;
 
   private:

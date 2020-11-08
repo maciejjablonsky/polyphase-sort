@@ -11,10 +11,10 @@ PageReader::PageReader(const std::string_view in_tape_file_path, const int page_
     }
 }
 
-byte_vector PageReader::ReadPage()
+Page PageReader::ReadPage()
 {
-    byte_vector page(page_size_);
-    in_tape_file_.read(reinterpret_cast<char *>(page.data()), page_size_);
+    Page page(page_size_);
+    in_tape_file_.read(reinterpret_cast<char *>(page.data()), page.size());
     ++hard_drive_accesses_;
     return page;
 }
