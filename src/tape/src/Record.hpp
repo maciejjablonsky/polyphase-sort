@@ -8,8 +8,6 @@
 namespace Record
 {
 
-using memory_vector = std::vector<uint8_t>;
-
 struct SerializedRecord
 {
     time_t time_since_epoch;

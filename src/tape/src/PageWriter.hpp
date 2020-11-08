@@ -6,13 +6,14 @@
 #include <fstream>
 #include <vector>
 #include "byte.hpp"
+#include "Page.hpp"
 
 class PageWriter : public IHardDriveAccessor
 {
   public:
     PageWriter(const std::string_view out_tape_file_path, const int page_size);
     int GetHardDriveAccessesNumber() const override;
-    void WritePage(const byte_vector &page);    
+    void WritePage(const Page  &page);    
   private:
     int hard_drive_accesses_ = 0;
     std::fstream out_tape_file_;

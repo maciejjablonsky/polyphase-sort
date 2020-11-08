@@ -17,7 +17,7 @@ int PageWriter::GetHardDriveAccessesNumber() const
     return hard_drive_accesses_;
 }
 
-void PageWriter::WritePage(const byte_vector &page)
+void PageWriter::WritePage(const Page &page)
 {
     if (page.size() > page_size_)
     {
