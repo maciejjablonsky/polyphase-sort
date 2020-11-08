@@ -1,27 +1,42 @@
 #include <gtest/gtest.h>
 #include "TapeReader.hpp"
 #include "TestConfig.hpp"
+#include <fmt/format.h>
+#include <ranges>
 
 TEST(TapeReaderTest, sunny_scenario_EndOfTapeReached)
 {
-    const std::string tape_path = TestConfig::GetResourcePath() + "tape_page_size_36_pages_2_records_7.records";
-    TapeReader reader(tape_path, 36);
-    for (int i = 0; i < 7; ++i)
+    const std::string tape_path = TestConfig::GetResourcePath() + "page_size_40_pages_2_records_7.records";
+    TapeReader reader(tape_path, 40);
+    int counter = 0;
+    for (auto &record : reader)
     {
-        reader.GetNextRecord();
+        counter++;
     }
-    EXPECT_TRUE(reader.EndOfTape());
+    EXPECT_EQ(counter, 7);
+    EXPECT_TRUE(reader.WholeTapeRead());
 }
 
 TEST(TapeReaderTest, sunny_scenario_RecordsAreReadProperly)
 {
     const std::string tape_path =
-        TestConfig::GetResourcePath() + "tape_page_size_36_pages_2_records_7.records";
-    TapeReader reader(tape_path, 36);
+        TestConfig::GetResourcePath() + "page_size_40_pages_2_records_7.records";
+    TapeReader reader(tape_path, 40);
     std::vector<Record::SerializedRecord> references = {{1}, {2}, {3}, {4}, {5}, {6}, {7}};
-    for (const auto &record : references)
+    int counter = 0;
+    for (auto & record: reader)
     {
-        EXPECT_EQ(record, reader.GetNextRecord());
+        EXPECT_EQ(record, references.at(counter));
+        counter++;
     }
-    EXPECT_ANY_THROW(reader.GetNextRecord());
+    EXPECT_EQ(counter, 7);
+}
+
+TEST(TapeReaderIteratorsTest, DISABLED_sunny_scenario_CopyAllRecords)
+{
+    const std::string tape_path =
+        TestConfig::GetResourcePath() + "page_size_40_pages_2_records_7.records";
+    TapeReader reader(tape_path, 40);
+    std::vector<Record::SerializedRecord> references = {{1}, {2}, {3}, {4}, {5}, {6}, {7}};
+    std::vector<Record::SerializedRecord> copied;
 }

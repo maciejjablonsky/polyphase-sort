@@ -3,7 +3,7 @@
 
 struct PageHeader
 {
-    int inserted_records_number;
+    int64_t inserted_records_number;
 };
 
 #endif // PAGE_HEADER_HPP

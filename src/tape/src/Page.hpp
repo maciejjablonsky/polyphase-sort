@@ -15,11 +15,11 @@ class Page
     int size() const;
     std::byte *data();
     const std::byte *data() const;
-    int records_number() const;
+    int64_t records_number() const;
 
   private:
     byte_vector memory_;
     PageHeader * header_;
 };
 
-#endif
+#endif // PAGE_HPP

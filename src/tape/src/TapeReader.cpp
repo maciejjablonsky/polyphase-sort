@@ -1,49 +1,114 @@
 #include "TapeReader.hpp"
 
 TapeReader::TapeReader(const std::string_view in_tape_file_path, const int page_size)
-    : reader_(in_tape_file_path, page_size), bytes_read_(0), pages_(reader_.PagesInTapeFile()),
-      current_page_idx_(-1)
+    : reader_(in_tape_file_path, page_size), pages_(reader_.PagesInTapeFile()), pages_read_(0)
 {
     ReadNextPage();
 }
 
-bool TapeReader::EndOfTape() const
+TapeReader::iterator TapeReader::begin()
 {
-    return RecordsReadFromCurrentPage() == CurrentPage().records_number() && reader_.WasLastPageRead();
+    return iterator(pages_.front().data(), *this);
 }
 
-Record::SerializedRecord &TapeReader::GetNextRecord()
+TapeReader::sentinel TapeReader::end() const
 {
-    if (RecordsReadFromCurrentPage() >= CurrentPage().records_number())
-    {
-        ReadNextPage();
-    }
-    Record::SerializedRecord *record = reinterpret_cast<Record::SerializedRecord *>(
-        CurrentPage().data() + sizeof(PageHeader) + 
-        (RecordsReadFromCurrentPage() * sizeof(Record::SerializedRecord)));
-    bytes_read_ += sizeof(Record::SerializedRecord);
-    return *record;
+    return sentinel{};
 }
 
-int TapeReader::RecordsReadFromCurrentPage() const
+bool TapeReader::WholeTapeRead() const
 {
-    return (bytes_read_ - sizeof(PageHeader)) / sizeof(Record::SerializedRecord);
+    return reader_.WasLastPageRead();
 }
 
-Page &TapeReader::CurrentPage()
+std::vector<Page> &TapeReader::GetPages()
 {
-    return const_cast<Page&>(static_cast<const TapeReader &>(*this).CurrentPage());
-}
-
-const Page &TapeReader::CurrentPage() const
-{
-    return pages_.at(current_page_idx_);
+    return pages_;
 }
 
 Page &TapeReader::ReadNextPage()
 {
-    ++current_page_idx_;
-    pages_.at(current_page_idx_) =  reader_.ReadPage();
-    bytes_read_ = sizeof(PageHeader);
-    return pages_.at(current_page_idx_);
+    ++pages_read_;
+    pages_.at(pages_read_ - 1) = reader_.ReadPage();
+    return pages_.at(pages_read_ - 1);
+}
+
+bool operator==(const TapeReader::iterator &iter, TapeReader::sentinel s)
+{
+    return iter.ptr_ == iter.last_;
+}
+
+bool operator!=(const TapeReader::iterator &iter, TapeReader::sentinel s)
+{
+    return !operator==(iter, s);
+}
+
+TapeReader::iterator::iterator(std::byte *page_beginning, TapeReader &parent)
+    : bytes_offset_(sizeof(PageHeader)),
+      ptr_(reinterpret_cast<Record::SerializedRecord *>(page_beginning + bytes_offset_)), tape_reader_(parent)
+{
+}
+
+TapeReader::iterator &TapeReader::iterator::operator++()
+{
+    bytes_offset_ += sizeof(Record::SerializedRecord);
+    ptr_++;
+    if (RecordsReadFromCurrentPage() >= CurrentPage().records_number() && !tape_reader_.WholeTapeRead())
+    {
+        ++current_page_idx_;
+        auto & page = tape_reader_.ReadNextPage();
+        bytes_offset_ = sizeof(PageHeader);
+        ptr_ = reinterpret_cast<TapeReader::tape_item *>(CurrentPage().data() + bytes_offset_);
+        if (last_ == nullptr && tape_reader_.WholeTapeRead())
+        {
+            int offset = sizeof(PageHeader) + page.records_number() * sizeof(Record::SerializedRecord);
+
+            last_ = reinterpret_cast<Record::SerializedRecord *>(reinterpret_cast<char *>(page.data()) +
+                                                                 offset);
+        }
+    }
+
+    return *this;
+}
+
+// TapeReader::iterator &TapeReader::iterator::operator++(int)
+//{
+//    auto tmp = *this;
+//    if (RecordsReadFromCurrentPage() >= CurrentPage().records_number())
+//    {
+//        tape_reader_.ReadNextPage();
+//        bytes_read_ = sizeof(PageHeader);
+//    }
+//    bytes_read_ += sizeof(Record::SerializedRecord);
+//    return tmp;
+//}
+
+TapeReader::tape_item &TapeReader::iterator::operator*()
+{
+    return *(this->ptr_);
+}
+
+int TapeReader::iterator::RecordsReadFromCurrentPage() const
+{
+    return (bytes_offset_ - sizeof(PageHeader)) / sizeof(Record::SerializedRecord);
+}
+
+const Page &TapeReader::iterator::CurrentPage() const
+{
+    return tape_reader_.pages_.at(current_page_idx_);
+}
+
+Page &TapeReader::iterator::CurrentPage()
+{
+    return const_cast<Page &>(static_cast<const TapeReader::iterator &>(*this).CurrentPage());
+}
+
+bool operator==(const TapeReader::iterator &lhs, const TapeReader::iterator &rhs)
+{
+    return lhs.ptr_ == rhs.ptr_;
+}
+
+bool operator!=(const TapeReader::iterator &lhs, const TapeReader::iterator &rhs)
+{
+    return !(lhs.ptr_ == rhs.ptr_);
 }
