@@ -7,17 +7,19 @@
 class Page
 {
   public:
+    Page();
     Page(int page_size);
     Page(byte_vector &&memory);
     Page(std::initializer_list<std::byte> list);
+    //Page &operator=(Page &&page) = default;
     int size() const;
     std::byte *data();
     const std::byte *data() const;
     int records_number() const;
 
   private:
-    PageHeader * header_;
     byte_vector memory_;
+    PageHeader * header_;
 };
 
 #endif

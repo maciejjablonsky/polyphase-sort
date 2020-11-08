@@ -1,18 +1,24 @@
 #include "Page.hpp"
 #include <algorithm>
 
-Page::Page(int page_size) : memory_(std::max(page_size, static_cast<int>(sizeof(PageHeader))))
+Page::Page() : memory_(sizeof(PageHeader)),
+      header_(reinterpret_cast<PageHeader *>(memory_.data()))
 {
-    header_ = reinterpret_cast<PageHeader *>(memory_.data());
 }
 
-Page::Page(byte_vector &&memory) : memory_(std::move(memory))
+Page::Page(int page_size)
+    : memory_(std::max(page_size, static_cast<int>(sizeof(PageHeader)))),
+      header_(reinterpret_cast<PageHeader *>(memory_.data()))
 {
-    header_ = reinterpret_cast<PageHeader *>(memory_.data());
 }
-Page::Page(std::initializer_list<std::byte> list) : memory_(list)
+
+Page::Page(byte_vector &&memory)
+    : memory_(std::move(memory)), header_(reinterpret_cast<PageHeader *>(memory_.data()))
 {
-    header_ = reinterpret_cast<PageHeader *>(memory_.data());
+}
+Page::Page(std::initializer_list<std::byte> list)
+    : memory_(list), header_(reinterpret_cast<PageHeader *>(memory_.data()))
+{
 }
 
 int Page::size() const

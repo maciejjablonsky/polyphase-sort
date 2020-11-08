@@ -15,6 +15,8 @@ set(SOURCES
     PageReader.cpp
     Page.hpp
     Page.cpp
+    TapeReader.hpp
+    TapeReader.cpp
 )
 
 add_library(tape ${SOURCES})

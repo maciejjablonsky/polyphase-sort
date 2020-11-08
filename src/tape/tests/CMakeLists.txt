@@ -7,6 +7,7 @@ add_executable(${TARGET_NAME}
      TestConfig.hpp
      TestConfig.cpp
      PageReader_test.cpp
+     TapeReader_test.cpp
 )
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 
