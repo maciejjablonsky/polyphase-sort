@@ -16,7 +16,7 @@ void TapeWriter::Flush()
     for(const auto & records : records_vector_buffer_)
     {
         tape_stream_.write(reinterpret_cast<const char *>(records.data()),
-                           factory_funcs::vectorsizeof(records));
+                           funcs::vectorsizeof(records));
     }
     records_vector_buffer_.clear();
 }

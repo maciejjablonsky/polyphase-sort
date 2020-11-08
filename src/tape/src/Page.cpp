@@ -36,7 +36,8 @@ const std::byte *Page::data() const
     return memory_.data();
 }
 
-int Page::records_number() const
+
+int64_t Page::records_number() const
 {
     return header_->inserted_records_number;
 }

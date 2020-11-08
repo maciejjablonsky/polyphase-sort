@@ -38,3 +38,8 @@ int PageReader::PageSize() const
 {
     return page_size_;
 }
+
+int PageReader::PagesInTapeFile() const
+{
+    return tape_file_last_byte_pos_/ page_size_;
+}
