@@ -10,14 +10,14 @@ namespace Record
 
 struct SerializedRecord
 {
-    time_t time_since_epoch;
+    time_t creation_time;
 };
 
 bool operator==(const SerializedRecord &lhs, const SerializedRecord &rhs);
 
 struct RuntimeRecord
 {
-    time_t time_since_epoch;
+    time_t creation_time;
 };
 
 static_assert(std::is_default_constructible_v<RuntimeRecord>);

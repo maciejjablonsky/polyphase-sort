@@ -10,7 +10,6 @@ void TestConfig::Config(const int argc, const char *argv[])
     resource_path_ = argv[1];
     resource_path_ += '/';
     tmp_path_ = argv[2];
-    fmt::print("Tmp path = {}\n", tmp_path_);
 }
 
 std::string TestConfig::GetResourcePath()
