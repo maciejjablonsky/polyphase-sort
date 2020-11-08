@@ -23,5 +23,5 @@ TEST(TapeReaderTest, sunny_scenario_RecordsAreReadProperly)
     {
         EXPECT_EQ(record, reader.GetNextRecord());
     }
-    //EXPECT_ANY_THROW(reader.GetNextRecord());
+    EXPECT_ANY_THROW(reader.GetNextRecord());
 }

@@ -41,5 +41,5 @@ int PageReader::PageSize() const
 
 int PageReader::PagesInTapeFile() const
 {
-    return (tape_file_last_byte_pos_ /*+ std::ifstream::pos_type(1)*/)/ page_size_;
+    return tape_file_last_byte_pos_/ page_size_;
 }
