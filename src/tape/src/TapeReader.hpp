@@ -19,12 +19,14 @@ class TapeReader
         iterator(std::byte *page_beginning, TapeReader &parent);
         iterator &operator++();
         tape_item &operator*();
+        friend int operator-(const iterator &lhs, const iterator &rhs);
         friend bool operator==(const iterator &lhs, const iterator &rhs);
         friend bool operator!=(const iterator &lhs, const iterator &rhs);
         friend bool operator==(const iterator &iter, sentinel);
         friend bool operator!=(const iterator &iter, sentinel);
 
       private:
+        bool IsOnLastPage() const;
         int RecordsReadFromCurrentPage() const;
         const Page &CurrentPage() const;
         Page &CurrentPage();

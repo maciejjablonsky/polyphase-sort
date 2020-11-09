@@ -46,3 +46,17 @@ TEST(TapeReaderIteratorsTest, DISABLED_sunny_scenario_CopyAllRecords)
     }
 }
 
+TEST(TapeReaderIteratorsTest, sunny_scenario_IteratorsSubtractionAsDistanceCounter)
+{
+    const std::string tape_path =
+        TestConfig::GetResourcePath() + "page_size_40_pages_2_records_7.records";
+    TapeReader reader(tape_path, 40);
+    auto lhs_iter = reader.begin();
+    auto rhs_iter = reader.begin();
+    int distance = 6;
+    for (int i = 0; i < distance; ++i)
+    {
+        ++rhs_iter;
+    }
+    EXPECT_EQ(rhs_iter - lhs_iter, distance);
+}

@@ -53,13 +53,13 @@ TapeReader::iterator &TapeReader::iterator::operator++()
 {
     bytes_offset_ += sizeof(Record::SerializedRecord);
     ptr_++;
-    if (RecordsReadFromCurrentPage() >= CurrentPage().records_number() && !tape_reader_.WholeTapeRead())
+    if (RecordsReadFromCurrentPage() >= CurrentPage().records_number() && !IsOnLastPage())
     {
         ++current_page_idx_;
         auto & page = tape_reader_.ReadNextPage();
         bytes_offset_ = sizeof(PageHeader);
         ptr_ = reinterpret_cast<TapeReader::tape_item *>(CurrentPage().data() + bytes_offset_);
-        if (last_ == nullptr && tape_reader_.WholeTapeRead())
+        if (last_ == nullptr && IsOnLastPage())
         {
             int offset = sizeof(PageHeader) + page.records_number() * sizeof(Record::SerializedRecord);
 
@@ -70,18 +70,6 @@ TapeReader::iterator &TapeReader::iterator::operator++()
 
     return *this;
 }
-
-// TapeReader::iterator &TapeReader::iterator::operator++(int)
-//{
-//    auto tmp = *this;
-//    if (RecordsReadFromCurrentPage() >= CurrentPage().records_number())
-//    {
-//        tape_reader_.ReadNextPage();
-//        bytes_read_ = sizeof(PageHeader);
-//    }
-//    bytes_read_ += sizeof(Record::SerializedRecord);
-//    return tmp;
-//}
 
 TapeReader::tape_item &TapeReader::iterator::operator*()
 {
@@ -111,4 +99,16 @@ bool operator==(const TapeReader::iterator &lhs, const TapeReader::iterator &rhs
 bool operator!=(const TapeReader::iterator &lhs, const TapeReader::iterator &rhs)
 {
     return !(lhs.ptr_ == rhs.ptr_);
+}
+
+bool TapeReader::iterator::IsOnLastPage() const
+{
+    return tape_reader_.WholeTapeRead() && (current_page_idx_ == tape_reader_.pages_.size() - 1);
+}
+int operator-(const TapeReader::iterator &lhs, const TapeReader::iterator &rhs)
+{
+    TapeReader::iterator tmp_rhs = rhs;
+    int counter = 0;
+    while (lhs.ptr_ != tmp_rhs.ptr_) {counter++;}
+    return counter;
 }

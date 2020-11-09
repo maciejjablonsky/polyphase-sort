@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace factory_funcs
+namespace funcs
 {
 
 template <typename T> int vectorsizeof(const std::vector<T> &vec)
