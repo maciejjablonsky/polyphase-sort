@@ -32,6 +32,7 @@ class TapeReader
         Page &CurrentPage();
 
       private:
+        int pointed_record_idx_ = 0;
         TapeReader &tape_reader_;
         int bytes_offset_ = 0;
         int current_page_idx_ = 0;
@@ -46,7 +47,7 @@ class TapeReader
     friend class TapeReader::iterator;
     bool WholeTapeRead() const;
     std::vector<Page> &GetPages();
-
+    Page &GetPage(int idx);
   private:
     Page &ReadNextPage();
 

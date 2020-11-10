@@ -1,4 +1,5 @@
 #include "TapeReader.hpp"
+#include <stdexcept>
 
 TapeReader::TapeReader(const std::string_view in_tape_file_path, const int page_size)
     : reader_(in_tape_file_path, page_size), pages_(reader_.PagesInTapeFile()), pages_read_(0)
@@ -24,6 +25,20 @@ bool TapeReader::WholeTapeRead() const
 std::vector<Page> &TapeReader::GetPages()
 {
     return pages_;
+}
+
+Page &TapeReader::GetPage(int page_idx)
+{
+    if (page_idx >= reader_.PagesInTapeFile())
+    {
+        throw std::runtime_error("Demanded page index is too large.");
+    }
+    while (pages_read_ - 1 < page_idx)
+    {
+        ReadNextPage();
+        ++pages_read_;
+    }
+    return pages_.at(page_idx);
 }
 
 Page &TapeReader::ReadNextPage()
@@ -52,19 +67,20 @@ TapeReader::iterator::iterator(std::byte *page_beginning, TapeReader &parent)
 TapeReader::iterator &TapeReader::iterator::operator++()
 {
     bytes_offset_ += sizeof(Record::SerializedRecord);
-    ptr_++;
+    ++ptr_;
+    ++pointed_record_idx_;
     if (RecordsReadFromCurrentPage() >= CurrentPage().records_number() && !IsOnLastPage())
     {
         ++current_page_idx_;
-        auto & page = tape_reader_.ReadNextPage();
+        auto &page = tape_reader_.GetPage(current_page_idx_);
         bytes_offset_ = sizeof(PageHeader);
         ptr_ = reinterpret_cast<TapeReader::tape_item *>(CurrentPage().data() + bytes_offset_);
         if (last_ == nullptr && IsOnLastPage())
         {
             int offset = sizeof(PageHeader) + page.records_number() * sizeof(Record::SerializedRecord);
 
-            last_ = reinterpret_cast<Record::SerializedRecord *>(reinterpret_cast<char *>(page.data()) +
-                                                                 offset);
+            last_ =
+                reinterpret_cast<Record::SerializedRecord *>(reinterpret_cast<char *>(page.data()) + offset);
         }
     }
 
@@ -107,8 +123,14 @@ bool TapeReader::iterator::IsOnLastPage() const
 }
 int operator-(const TapeReader::iterator &lhs, const TapeReader::iterator &rhs)
 {
-    TapeReader::iterator tmp_rhs = rhs;
+    /*TapeReader::iterator tmp_rhs = rhs;
     int counter = 0;
-    while (lhs.ptr_ != tmp_rhs.ptr_) {counter++;}
-    return counter;
+    auto ending = TapeReader::sentinel();
+    while (tmp_rhs != ending && lhs.ptr_ != tmp_rhs.ptr_)
+    {
+        counter++;
+        ++tmp_rhs;
+    }
+    return counter;*/
+    return lhs.pointed_record_idx_ - rhs.pointed_record_idx_;
 }
