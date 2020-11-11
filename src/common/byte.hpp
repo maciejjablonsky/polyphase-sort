@@ -5,7 +5,7 @@
 
 using byte_vector = std::vector<std::byte>;
 
-inline constexpr std::byte operator "" _byte( unsigned long long arg ) noexcept
+inline constexpr std::byte operator "" _b( unsigned long long arg ) noexcept
 {
     return static_cast< std::byte >( arg );
 }

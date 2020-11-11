@@ -8,8 +8,7 @@
 TEST(PageWriterTest, sunny_scenario_BytesLengthNotExceeding)
 {
     const std::string tape_path = TestConfig::GetTmpFilePath();
-    Page page{0x4_byte, 0_byte, 0_byte,   0_byte,   0_byte,   0_byte,
-              0_byte,   0_byte, 0x1_byte, 0x2_byte, 0x3_byte, 0x4_byte};
+    Page page{0x4_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0x1_b, 0x2_b, 0x3_b, 0x4_b};
     const int page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size);
@@ -20,8 +19,7 @@ TEST(PageWriterTest, sunny_scenario_BytesLengthNotExceeding)
 TEST(PageWriterTest, BytesLengthExceedPageSize)
 {
     const std::string tape_path = TestConfig::GetTmpFilePath();
-    Page page{0x5_byte, 0_byte,   0_byte,   0_byte,   0_byte,   0_byte,  0_byte,
-              0_byte,   0x1_byte, 0x2_byte, 0x3_byte, 0x4_byte, 0x5_byte};
+    Page page{0x5_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0x1_b, 0x2_b, 0x3_b, 0x4_b, 0x5_b};
     const auto page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size + 1);
@@ -32,8 +30,7 @@ TEST(PageWriterTest, BytesLengthExceedPageSize)
 TEST(PageWriterTest, DriveAccessCounterWorks)
 {
     const std::string tape_path = TestConfig::GetTmpFilePath();
-    Page page{0x4_byte, 0_byte, 0_byte,   0_byte,   0_byte,   0_byte,
-              0_byte,   0_byte, 0x1_byte, 0x2_byte, 0x3_byte, 0x4_byte};
+    Page page{0x4_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0x1_b, 0x2_b, 0x3_b, 0x4_b};
     const auto page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size);
