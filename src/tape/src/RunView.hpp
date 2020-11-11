@@ -14,14 +14,16 @@ class RunView
         friend bool operator==(iterator lhs, iterator rhs);
         friend bool operator!=(iterator lhs, iterator rhs);
         iterator &operator++();
+        decltype(TapeReader::iterator::operator*) &operator*();
 
       private:
-        TapeReader::iterator it;
+        TapeReader::iterator tape_iter_;
     };
     RunView(TapeReader::iterator beginning, TapeReader::iterator ending);
     int Length() const;
     iterator begin();
     iterator end();
+
   private:
     TapeReader::iterator beginning_;
     TapeReader::iterator ending_;
