@@ -44,7 +44,7 @@ Page &TapeReader::GetPage(int page_idx)
 Page &TapeReader::ReadNextPage()
 {
     ++pages_read_;
-    pages_.at(pages_read_ - 1) = reader_.ReadPage();
+    pages_[pages_read_ - 1] = reader_.ReadPage();
     return pages_.at(pages_read_ - 1);
 }
 
