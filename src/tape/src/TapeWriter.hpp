@@ -16,8 +16,8 @@ class TapeWriter
   private:
     PageWriter writer_;
     int page_size_;
-    std::unique_ptr<Page> buffered_page_;
-    int page_fill_index_;
+    Page preparing_page_;
+    int records_count_;
 };
 
 #endif // TAPEWRITER_HPP
