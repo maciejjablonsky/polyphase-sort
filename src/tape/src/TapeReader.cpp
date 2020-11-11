@@ -2,9 +2,15 @@
 #include <stdexcept>
 
 TapeReader::TapeReader(const std::string_view in_tape_file_path, const int page_size)
-    : reader_(in_tape_file_path, page_size), pages_(reader_.PagesInTapeFile()), pages_read_(0)
+    : reader_(in_tape_file_path, page_size), pages_(reader_.PagesInTapeFile()), pages_read_(0),
+      pages_source_(PagesSource::TAPE_FILE)
 {
     ReadNextPage();
+}
+
+TapeReader::TapeReader(const std::vector<Page> &pages, const int page_size)
+    : pages_(pages), pages_read_(pages.size()), pages_source_(PagesSource::PREPARED_PAGES)
+{
 }
 
 TapeReader::iterator TapeReader::begin()
@@ -19,7 +25,15 @@ TapeReader::sentinel TapeReader::end() const
 
 bool TapeReader::WholeTapeRead() const
 {
-    return reader_.WasLastPageRead();
+    switch (pages_source_)
+    {
+    case PagesSource::PREPARED_PAGES:
+        return true;
+    case PagesSource::TAPE_FILE:
+        return reader_.WasLastPageRead();
+    default:
+        return true;
+    };
 }
 
 std::vector<Page> &TapeReader::GetPages()
@@ -29,14 +43,25 @@ std::vector<Page> &TapeReader::GetPages()
 
 Page &TapeReader::GetPage(int page_idx)
 {
-    if (page_idx >= reader_.PagesInTapeFile())
+    switch (pages_source_)
     {
-        throw std::runtime_error("Demanded page index is too large.");
-    }
-    while (pages_read_ - 1 < page_idx)
-    {
-        ReadNextPage();
-        ++pages_read_;
+    case PagesSource::PREPARED_PAGES:
+        if (page_idx >= pages_.size())
+        {
+            throw std::runtime_error("Demanded page index is too large.");
+        }
+        break;
+    case PagesSource::TAPE_FILE:
+        if (page_idx >= reader_.PagesInTapeFile())
+        {
+            throw std::runtime_error("Demanded page index is too large.");
+        }
+        while (pages_read_ - 1 < page_idx)
+        {
+            ReadNextPage();
+            ++pages_read_;
+        }
+        break;
     }
     return pages_.at(page_idx);
 }

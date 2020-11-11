@@ -42,7 +42,7 @@ RunView::iterator &RunView::iterator::operator++()
 }
 
 
-decltype(TapeReader::iterator::operator*) & RunView::iterator::operator*()
+TapeReader::tape_item & RunView::iterator::operator*()
 {
     return *tape_iter_;
 }

@@ -42,6 +42,7 @@ class TapeReader
 
   public:
     TapeReader(const std::string_view in_tape_file_path, const int page_size);
+    TapeReader(const std::vector<Page> &pages, const int page_size);
     iterator begin();
     sentinel end() const;
     friend class TapeReader::iterator;
@@ -52,10 +53,15 @@ class TapeReader
     Page &ReadNextPage();
 
   private:
+    enum class PagesSource
+    {
+        TAPE_FILE,
+        PREPARED_PAGES
+    };
     PageReader reader_;
-    int bytes_offset_;
     std::vector<Page> pages_;
     int pages_read_;
+    PagesSource pages_source_;
 };
 
 

@@ -14,7 +14,7 @@ class RunView
         friend bool operator==(iterator lhs, iterator rhs);
         friend bool operator!=(iterator lhs, iterator rhs);
         iterator &operator++();
-        decltype(TapeReader::iterator::operator*) &operator*();
+        TapeReader::tape_item &operator*();
 
       private:
         TapeReader::iterator tape_iter_;
