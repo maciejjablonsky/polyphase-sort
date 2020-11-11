@@ -3,7 +3,8 @@
 #include <cstdlib>
 
 PageWriter::PageWriter(const std::string_view out_file_path, const int page_size)
-    : page_size_(page_size), out_tape_file_(out_file_path.data(), std::ios::out | std::ios::binary)
+    : out_path_(out_file_path), page_size_(page_size),
+      out_tape_file_(out_file_path.data(), std::ios::out | std::ios::binary)
 {
     if (!out_tape_file_.is_open())
     {
@@ -17,14 +18,53 @@ int PageWriter::GetHardDriveAccessesNumber() const
     return hard_drive_accesses_;
 }
 
-void PageWriter::WritePage(const Page &page)
+void PageWriter::WritePage(Page &&page)
 {
-    if (page.size() > page_size_)
+    try
     {
-        throw std::runtime_error(
-            fmt::format("ERROR: Byte vector exceeds drive page size. Expected size = {}, actual size = {}\n",
-                        page_size_, page.size()));
+        if (page.size() > page_size_)
+        {
+            throw std::runtime_error(fmt::format(
+                "ERROR: Byte vector exceeds drive page size. Expected size = {}, actual size = {}\n",
+                page_size_, page.size()));
+        }
+
+        pages_.push_back(std::move(page));
     }
-    out_tape_file_.write(reinterpret_cast<const char *>(page.data()), page.size());
-    ++hard_drive_accesses_;
+    catch (const std::exception &e)
+    {
+        throw std::runtime_error(fmt::format("Failed to buffer a page. Error message: {}", e.what()));
+    }
+}
+
+void PageWriter::Flush()
+{
+    for (const auto &page : pages_)
+    {
+        try
+        {
+            out_tape_file_.write(reinterpret_cast<const char *>(page.data()), page.size());
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error(
+                fmt::format("Failed to write to a file [{}]. Error message: {}", out_path_, e.what()));
+        }
+
+        ++hard_drive_accesses_;
+    }
+    pages_.clear();
+}
+
+PageWriter::~PageWriter()
+{
+    try
+    {
+        Flush();
+    }
+    catch (const std::exception &e)
+    {
+        fmt::print("Failed to write to a file [{}]. Error message: {}", out_path_, e.what());
+        std::exit(-1);
+    }
 }

@@ -9,8 +9,6 @@ set(SOURCES
     PageWriter.hpp
     PageWriter.cpp
     IHardDriveAccessor.hpp
-    Series.hpp
-    Series.cpp
     PageReader.hpp
     PageReader.cpp
     Page.hpp

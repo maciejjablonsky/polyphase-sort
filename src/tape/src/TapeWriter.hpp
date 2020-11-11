@@ -1,24 +1,23 @@
 #ifndef TAPEWRITER_HPP
 #define TAPEWRITER_HPP
 #include "Record.hpp"
+#include "PageWriter.hpp"
 #include <vector>
 #include <string_view>
-#include <fstream>
-#include <queue>
-
+#include <memory>
 class TapeWriter
 {
-    using vector_of_serialized_records = std::vector<Record::SerializedRecord>;
   public:
     TapeWriter(const std::string_view tape_path, int disk_page_size);
-    void Write(std::vector<Record::SerializedRecord> &&serialized_records);
+    void Write(const Record::SerializedRecord & record);
     void Flush();
     ~TapeWriter();
 
   private:
-    const int disk_page_size_;
-    std::fstream tape_stream_;
-    std::vector<vector_of_serialized_records> records_vector_buffer_;
+    PageWriter writer_;
+    int page_size_;
+    Page preparing_page_;
+    int records_count_;
 };
 
 #endif // TAPEWRITER_HPP

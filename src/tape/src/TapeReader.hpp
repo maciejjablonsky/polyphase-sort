@@ -19,17 +19,20 @@ class TapeReader
         iterator(std::byte *page_beginning, TapeReader &parent);
         iterator &operator++();
         tape_item &operator*();
+        friend int operator-(const iterator &lhs, const iterator &rhs);
         friend bool operator==(const iterator &lhs, const iterator &rhs);
         friend bool operator!=(const iterator &lhs, const iterator &rhs);
         friend bool operator==(const iterator &iter, sentinel);
         friend bool operator!=(const iterator &iter, sentinel);
 
       private:
+        bool IsOnLastPage() const;
         int RecordsReadFromCurrentPage() const;
         const Page &CurrentPage() const;
         Page &CurrentPage();
 
       private:
+        int pointed_record_idx_ = 0;
         TapeReader &tape_reader_;
         int bytes_offset_ = 0;
         int current_page_idx_ = 0;
@@ -39,20 +42,26 @@ class TapeReader
 
   public:
     TapeReader(const std::string_view in_tape_file_path, const int page_size);
+    TapeReader(const std::vector<Page> &pages, const int page_size);
     iterator begin();
     sentinel end() const;
     friend class TapeReader::iterator;
     bool WholeTapeRead() const;
     std::vector<Page> &GetPages();
-
+    Page &GetPage(int idx);
   private:
     Page &ReadNextPage();
 
   private:
+    enum class PagesSource
+    {
+        TAPE_FILE,
+        PREPARED_PAGES
+    };
     PageReader reader_;
-    int bytes_offset_;
     std::vector<Page> pages_;
     int pages_read_;
+    PagesSource pages_source_;
 };
 
 
