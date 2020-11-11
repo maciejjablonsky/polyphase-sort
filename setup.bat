@@ -6,6 +6,5 @@ cmake .. -DTESTING=1
 rem start cmake --build . -j --config Release
 rem start cmake --build . -j --config Debug
 start polyphase_sort.sln
-start GitExtensions.exe
 code ..
 cd ..
