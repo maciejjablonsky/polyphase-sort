@@ -2,18 +2,19 @@
 #include <algorithm>
 #include <stdexcept>
 
-Page::Page() : memory_(sizeof(PageHeader)), header_(reinterpret_cast<PageHeader *>(memory_.data()))
+Page::Page()
+    : memory_(sizeof(PageHeader)), header_(reinterpret_cast<PageHeader *>(memory_.data()))
 {
 }
 
 Page::Page(int page_size)
     : memory_(std::max(page_size, static_cast<int>(sizeof(PageHeader)))),
-      header_(reinterpret_cast<PageHeader *>(memory_.data()))
+      header_(reinterpret_cast<PageHeader *>(memory_.data())) 
 {
 }
 
 Page::Page(byte_vector &&memory)
-    : memory_(std::move(memory)), header_(reinterpret_cast<PageHeader *>(memory_.data()))
+   : memory_(std::move(memory)), header_(reinterpret_cast<PageHeader *>(memory_.data()))
 {
 }
 Page::Page(std::initializer_list<std::byte> list)
@@ -61,7 +62,7 @@ bool operator!=(Page::iterator lhs, Page::iterator rhs)
     return !(lhs == rhs);
 }
 
-Page::iterator::iterator(std::byte * ptr, Page &parent) : ptr_(ptr), page_(parent)
+Page::iterator::iterator(std::byte *ptr, Page &parent) : ptr_(ptr), page_(parent)
 {
 }
 
@@ -72,4 +73,13 @@ Page::iterator &Page::iterator::operator++()
         throw std::runtime_error("Cannot read past the page's memory.");
     }
     ++ptr_;
+    return *this;
+}
+
+Page::iterator Page::iterator::operator+(int offset)
+{
+    iterator tmp = *this;
+    for (int i = 0; i < offset; ++i, ++tmp)
+        ;
+    return tmp;
 }

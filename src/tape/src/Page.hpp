@@ -14,6 +14,7 @@ class Page
         friend bool operator==(iterator lhs, iterator rhs);
         friend bool operator!=(iterator lhs, iterator rhs);
         iterator & operator++();
+        iterator operator+(int);
       private:
         std::byte *ptr_;
         Page &page_;
