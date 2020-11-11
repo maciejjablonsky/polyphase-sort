@@ -1,8 +1,8 @@
 #include "Page.hpp"
 #include <algorithm>
+#include <stdexcept>
 
-Page::Page() : memory_(sizeof(PageHeader)),
-      header_(reinterpret_cast<PageHeader *>(memory_.data()))
+Page::Page() : memory_(sizeof(PageHeader)), header_(reinterpret_cast<PageHeader *>(memory_.data()))
 {
 }
 
@@ -36,8 +36,40 @@ const std::byte *Page::data() const
     return memory_.data();
 }
 
-
 int64_t Page::records_number() const
 {
     return header_->inserted_records_number;
+}
+
+Page::iterator Page::begin()
+{
+    return {memory_.data(), *this};
+}
+
+Page::iterator Page::end()
+{
+    return {memory_.data() + memory_.size(), *this};
+}
+
+bool operator==(Page::iterator lhs, Page::iterator rhs)
+{
+    return lhs.ptr_ == rhs.ptr_;
+}
+
+bool operator!=(Page::iterator lhs, Page::iterator rhs)
+{
+    return !(lhs == rhs);
+}
+
+Page::iterator::iterator(std::byte * ptr, Page &parent) : ptr_(ptr), page_(parent)
+{
+}
+
+Page::iterator &Page::iterator::operator++()
+{
+    if (*this == page_.end())
+    {
+        throw std::runtime_error("Cannot read past the page's memory.");
+    }
+    ++ptr_;
 }

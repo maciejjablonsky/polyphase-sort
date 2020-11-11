@@ -9,8 +9,7 @@ class RunView
   public:
     RunView(const TapeReader::iterator begin, int records_number);
     int Length() const;
-    auto begin() const;
-    
+    TapeReader::iterator begin();
   private:
     const TapeReader::iterator beginning_;
     int length_;
