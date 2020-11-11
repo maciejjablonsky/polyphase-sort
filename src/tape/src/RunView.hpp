@@ -7,11 +7,24 @@
 class RunView
 {
   public:
-    RunView(const TapeReader::iterator begin, int records_number);
+    class iterator
+    {
+      public:
+        iterator(TapeReader::iterator tape_iter);
+        friend bool operator==(iterator lhs, iterator rhs);
+        friend bool operator!=(iterator lhs, iterator rhs);
+        iterator &operator++();
+
+      private:
+        TapeReader::iterator it;
+    };
+    RunView(TapeReader::iterator beginning, TapeReader::iterator ending);
     int Length() const;
-    TapeReader::iterator begin();
+    iterator begin();
+    iterator end();
   private:
-    const TapeReader::iterator beginning_;
+    TapeReader::iterator beginning_;
+    TapeReader::iterator ending_;
     int length_;
 };
 

@@ -1,6 +1,7 @@
-#include "SeriesView.hpp"
+#include "RunView.hpp"
 
-RunView::RunView(const TapeReader::iterator begin, int records_number) : beginning_(begin), length_(records_number)
+RunView::RunView(TapeReader::iterator beginning, TapeReader::iterator ending)
+    : beginning_(beginning), ending_(ending), length_(ending - beginning + 1)
 {
 }
 
@@ -9,8 +10,33 @@ int RunView::Length() const
     return length_;
 }
 
-auto RunView::begin() const
+RunView::iterator RunView::begin()
 {
-    return beginning_;
+    return {beginning_};
 }
 
+RunView::iterator RunView::end()
+{
+    return {ending_};
+}
+
+RunView::iterator::iterator(TapeReader::iterator tape_iter) : tape_iter_(tape_iter)
+{
+}
+
+
+bool operator==(RunView::iterator lhs, RunView::iterator rhs)
+{
+    return lhs.tape_iter_ == rhs.tape_iter_;
+}
+
+bool operator!=(RunView::iterator lhs, RunView::iterator rhs)
+{
+    return lhs.tape_iter_ != rhs.tape_iter_;
+}
+
+RunView::iterator &RunView::iterator::operator++()
+{
+    ++tape_iter_;
+    return *this;
+}
