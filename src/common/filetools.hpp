@@ -3,7 +3,8 @@
 #include <vector>
 #include <string_view>
 #include <iterator>
-namespace 
+#include "byte.hpp"
+namespace
 {
 template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_view file_path)
 {
@@ -20,7 +21,21 @@ template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_v
     return {};
 }
 
+byte_vector ReadBinaryFile(const std::string_view file_path)
+{
+    std::ifstream file(file_path.data(), std::ios::binary);
+    if (file.is_open())
+    {
+        file.seekg(0, file.end);
+        int length = file.tellg();
+        file.seekg(0, file.beg);
+        byte_vector vec(length);
+        file.read(reinterpret_cast<char *>(vec.data()), length);
+        return vec;
+    }
+    return {};
+}
 
-} // namespace FileTools
+} // namespace
 
 #endif // FILETOOLS_HPP
