@@ -44,7 +44,7 @@ TapeGenerator::TapeGenerator(const int argc, const char *argv[]) : argv_{argv + 
     auto page_size = GetPageSize();
     if (page_size)
     {
-        page_size_ = page_size_;
+        page_size_ = *page_size;
     }
 }
 
@@ -70,6 +70,10 @@ void TapeGenerator::Generate() const
     {
         auto record = Record::GetRandom();
         writer.Write(Record::Serialize(record));
+        if (i % 500000 == 0)
+        {
+            writer.Flush(); 
+        }
     }
     fmt::print("Written {} records to file {}. Page size is {}.\n", number_of_records_, out_file_path_,
                page_size_);
