@@ -14,6 +14,7 @@ RecordsPage::const_iterator& RecordsPage::const_iterator::operator++()
     }
     ++records_idx_;
     ++ptr_;
+    return *this;
 }
 
 const RecordsPage::stored_item& RecordsPage::const_iterator::operator*()

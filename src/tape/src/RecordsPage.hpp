@@ -33,8 +33,8 @@ class RecordsPage
     const_iterator end() const;
 
   private:
-    PageHeader* const page_header_;
     Page page_;
+    PageHeader* page_header_;
 };
 
 #endif // RECORDS_PAGE_HPP
