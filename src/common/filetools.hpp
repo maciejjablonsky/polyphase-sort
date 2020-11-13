@@ -4,6 +4,7 @@
 #include <string_view>
 #include <iterator>
 #include "byte.hpp"
+#include <fstream>
 namespace
 {
 template <typename T> std::vector<T> ReadFileWithBinaryArray(const std::string_view file_path)
