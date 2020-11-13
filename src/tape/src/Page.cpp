@@ -1,28 +1,20 @@
 #include "Page.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include "TapeReader.hpp"
 
-Page::Page()
-    : memory_(sizeof(PageHeader)), header_(reinterpret_cast<PageHeader *>(memory_.data())),
-      occupied_memory_end_(memory_.data() + memory_.size(), memory_.data() + memory_.capacity())
+Page::Page() : memory_(DEFAULT_PAGE_SIZE)
 {
 }
 
-Page::Page(int page_size)
-    : memory_(std::max(page_size, static_cast<int>(sizeof(PageHeader)))),
-      header_(reinterpret_cast<PageHeader *>(memory_.data())),
-      occupied_memory_end_(memory_.data() + sizeof(PageHeader), memory_.data() + memory_.capacity())
+Page::Page(uint64_t page_size) : memory_(page_size)
 {
 }
 
-Page::Page(byte_vector &&memory)
-    : memory_(std::move(memory)), header_(reinterpret_cast<PageHeader *>(memory_.data())),
-      occupied_memory_end_(memory_.data() + memory_.size(), memory_.data() + memory_.capacity())
+Page::Page(byte_vector&& memory) : memory_(std::move(memory))
 {
 }
-Page::Page(std::initializer_list<std::byte> list)
-    : memory_(list), header_(reinterpret_cast<PageHeader *>(memory_.data())),
-      occupied_memory_end_(memory_.data() + memory_.size(), memory_.data() + memory_.capacity())
+Page::Page(std::initializer_list<std::byte> list) : memory_(list)
 {
 }
 
@@ -31,138 +23,57 @@ int Page::size() const
     return memory_.size();
 }
 
-std::byte *Page::data()
+std::byte* Page::data()
 {
     return memory_.data();
 }
 
-const std::byte *Page::data() const
+const std::byte* Page::data() const
 {
     return memory_.data();
 }
 
-int64_t Page::records_number() const
+Page::const_iterator Page::cbegin()
 {
-    return header_->inserted_records_number;
+    return {memory_.data(), memory_.size()};
 }
 
-Page::iterator Page::begin()
+Page::const_iterator Page::begin() const
 {
-    return {memory_.data(), memory_.data() + memory_.capacity()};
+    return const_cast<Page&>(*this).cbegin();
 }
 
-Page::iterator Page::end()
+Page::const_iterator Page::cend()
 {
-    return {memory_.data() + memory_.capacity(), memory_.data() + memory_.capacity()};
+    return {memory_.data() + memory_.size(), memory_.size()};
 }
 
-Page::const_iterator Page::cbegin() const
+Page::const_iterator Page::end() const
 {
-    return {memory_.data(), memory_.data() + memory_.capacity()};
+    return const_cast<Page&>(*this).cend();
 }
 
-Page::const_iterator Page::cend() const
-{
-    return {memory_.data() + memory_.capacity(), memory_.data() + memory_.capacity()};
-}
-
-void Page::SetRecordsNumber(int stored_records)
-{
-    header_->inserted_records_number = static_cast<decltype(header_->inserted_records_number)>(stored_records);
-}
-
-void Page::Append(const std::byte *bytes, const int size)
-{
-    for (int i = 0; i < size; ++i)
-    {
-        *occupied_memory_end_++ = bytes[i];
-    }
-}
-
-void Page::Append(const byte_vector &bytes)
-{
-    Append(bytes.data(), bytes.size());
-}
-
-bool Page::IsFull() const
-{
-    return occupied_memory_end_ == cend();
-}
-
-bool operator==(const Page::const_iterator &lhs, const Page::const_iterator &rhs)
+bool operator==(const Page::const_iterator& lhs, const Page::const_iterator& rhs)
 {
     return lhs.ptr_ == rhs.ptr_;
 }
 
-bool operator!=(const Page::const_iterator &lhs, const Page::const_iterator &rhs)
+bool operator!=(const Page::const_iterator& lhs, const Page::const_iterator& rhs)
 {
     return !(lhs.ptr_ == rhs.ptr_);
 }
 
-bool operator==(const Page::iterator &lhs, const Page::const_iterator &rhs)
-{
-    return lhs.ptr_ == rhs.ptr_;
-}
-
-bool operator!=(const Page::iterator &lhs, const Page::const_iterator &rhs)
-{
-    return lhs.ptr_ != rhs.ptr_;
-}
-
-Page::iterator::iterator(std::byte *ptr, std::byte *ending) : ptr_(ptr), end_(ending)
+Page::const_iterator::const_iterator(const std::byte* ptr, const uint64_t size) : ptr_(ptr), page_size_(size)
 {
 }
 
-Page::iterator &Page::iterator::operator++()
-{
-    if (ptr_ == end_)
-    {
-        throw std::runtime_error("Cannot read past the page's memory.");
-    }
-    ++ptr_;
-    return *this;
-}
-
-Page::iterator Page::iterator::operator++(int)
-{
-    auto tmp = *this;
-    ++(*this);
-    return tmp;
-}
-
-Page::iterator Page::iterator::operator+(int offset)
-{
-    if (ptr_ + offset >= end_)
-    {
-        throw std::out_of_range("Cannot read past the page's memory.");
-    }
-
-    auto tmp = *this;
-    for (int i = 0; i < offset; ++i, ++tmp)
-        ;
-    return tmp;
-}
-
-std::byte &Page::iterator::operator*()
+const std::byte& Page::const_iterator::operator*()
 {
     return *ptr_;
 }
 
-Page::const_iterator::const_iterator(const std::byte *ptr, const std::byte *ending) : ptr_(ptr), end_(ending)
+Page::const_iterator& Page::const_iterator::operator++()
 {
-}
-
-const std::byte &Page::const_iterator::operator*()
-{
-    return *ptr_;
-}
-
-Page::const_iterator &Page::const_iterator::operator++()
-{
-    if (ptr_ == end_)
-    {
-        throw std::runtime_error("Cannot read past the page's memory.");
-    }
     ++ptr_;
     return *this;
 }
@@ -176,12 +87,19 @@ Page::const_iterator Page::const_iterator::operator++(int)
 
 Page::const_iterator Page::const_iterator::operator+(int offset)
 {
-    if (ptr_ + offset >= end_)
-    {
-        throw std::out_of_range("Cannot read past the page's memory.");
-    }
     auto tmp = *this;
-    for (int i = 0; i < offset; ++i, ++tmp)
-        ;
+    tmp.ptr_ += offset;
+    return tmp;
+}
+
+void Page::const_iterator::operator+=(uint64_t offset)
+{
+    *this = *this + offset;
+}
+
+Page::const_iterator Page::const_iterator::operator-(uint64_t offset)
+{
+    auto tmp = *this;
+    tmp.ptr_ -= offset;
     return tmp;
 }
