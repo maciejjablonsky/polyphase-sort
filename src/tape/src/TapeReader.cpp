@@ -62,6 +62,11 @@ bool TapeReader::LastPageLoaded() const
                       source_);
 }
 
+bool TapeReader::Empty() const
+{
+    return begin() == end();
+}
+
 void TapeReader::ReadNextPage()
 {
     current_page_ = RecordsPage(std::visit(overloaded{[](PageReader& reader) { return reader.ReadPage(); },

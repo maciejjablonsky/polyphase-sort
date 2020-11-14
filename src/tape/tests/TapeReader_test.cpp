@@ -18,6 +18,7 @@ TEST(TapeReaderTest, sunny_scenario_RecordsAreReadProperly)
         counter++;
     }
     ASSERT_EQ(counter, 7);
+    ASSERT_TRUE(reader.Empty());
 }
 
 TEST(TapeReaderIteratorsTest, sunny_scenario_CopyAllRecords)
@@ -29,7 +30,7 @@ TEST(TapeReaderIteratorsTest, sunny_scenario_CopyAllRecords)
     std::copy_n(reader.begin(), references.size(), copied.begin());
     for (int i = 0; i < references.size(); ++i)
     {
-        EXPECT_EQ(references.at(i), copied.at(i));
+        ASSERT_EQ(references.at(i), copied.at(i));
     }
 }
 
@@ -83,4 +84,5 @@ TEST(TapeReaderTest, sunny_scenario_ReadFromReadyPages)
         ASSERT_EQ(record, records[i++]);
     }
     ASSERT_EQ(i, records.size());
+    ASSERT_TRUE(reader.Empty());
 }
