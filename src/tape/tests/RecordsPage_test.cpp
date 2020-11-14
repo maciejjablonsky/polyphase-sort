@@ -15,3 +15,16 @@ TEST(RecordsPageTest, sunny_scenario_ProperRead)
         ASSERT_EQ(record, records[i++]);
     }
 }
+
+TEST(RecordsPageWritingTest, sunny_scenario_ProperWrite)
+{
+    std::vector<Record::SerializedRecord> records{{1}, {2}, {3}, {4}};
+    Page page(records.size() * sizeof(Record::SerializedRecord) + sizeof(PageHeader));
+    RecordsPage records_page(std::move(page));
+    std::copy_n(records.cbegin(), records.size(), records_page.begin());
+    records_page.WriteStoredRecordsNumber(records.size());
+    for (int i = 0; const auto& record : records_page)
+    {
+        ASSERT_EQ(record, records[i++]);
+    }
+}
