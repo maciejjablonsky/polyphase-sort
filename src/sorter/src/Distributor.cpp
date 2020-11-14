@@ -10,27 +10,29 @@ Distributor::Distributor(const std::string_view input_tape_file_path, const int 
 {
 }
 
-std::vector<std::string> Distributor::operator()() const
+std::vector<Tape> Distributor::operator()() const
 {
-    auto output_paths = GenerateOutputTapesPaths();
+    auto out_tapes = GenerateOutputTapes();
+
+    return {};
 }
 
-std::vector<std::string> Distributor::GenerateOutputTapesPaths() const
+std::vector<Tape> Distributor::GenerateOutputTapes() const
 {
-    struct tmp_path
+    struct out_tape
     {
-        std::filesystem::path path;
-        tmp_path() : path(std::filesystem::temp_directory_path())
-        {
-        }
-        std::string operator()()
+        Tape operator()()
         {
             using namespace std::chrono;
             auto timestamp = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
-            return fmt::format("{}/{}.tape", path, timestamp);
+            return {.dummy_series = 0, .series = 0, .file_path = fmt::format("tmp_out_{}.tape", timestamp)};
         }
     } generator;
     return {output_tapes_number_, generator()};
+}
+
+void Distributor::WriteSeriesToTape(TapeReader& in, const uint64_t series, TapeWriter& out)
+{
 }
 
 Distributor::Fibonacci::Fibonacci() : curr(0), next(1)

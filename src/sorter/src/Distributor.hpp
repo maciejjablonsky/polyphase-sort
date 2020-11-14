@@ -4,25 +4,29 @@
 #include <string_view>
 #include <vector>
 #include <string>
+#include "Tape.hpp"
+#include <TapeWriter.hpp>
+#include <TapeReader.hpp>
+
 class Distributor
 {
   public:
     Distributor(const std::string_view input_tape_file_path, const int output_tapes_number = 2);
-
-    std::vector<std::string> operator()() const;
+    std::vector<Tape> operator()() const;
 
   private:
-    std::vector<std::string> GenerateOutputTapesPaths() const;
+    std::vector<Tape> GenerateOutputTapes() const;
+    void WriteSeriesToTape(TapeReader & in, const uint64_t series, TapeWriter& out);
 
     struct Fibonacci
     {
         int curr;
         int next;
-        Fibonacci();     
+        Fibonacci();
         int Next();
     } fibonacci;
     const std::string_view input_tape_file_path_;
-    const int output_tapes_number_ = 0;
+    const uint64_t output_tapes_number_ = 0;
 };
 
 #endif // DISTRIBUTOR_HPP
