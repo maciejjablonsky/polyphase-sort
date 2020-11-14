@@ -33,6 +33,16 @@ const std::byte* Page::data() const
     return memory_.data();
 }
 
+Page::iterator Page::begin()
+{
+    return { memory_.data(), memory_.size()};
+}
+
+Page::iterator Page::end()
+{
+return {memory_.data() + memory_.size(), memory_.size()}; 
+}
+
 Page::const_iterator Page::cbegin()
 {
     return {memory_.data(), memory_.size()};
@@ -102,4 +112,55 @@ Page::const_iterator Page::const_iterator::operator-(uint64_t offset)
     auto tmp = *this;
     tmp.ptr_ -= offset;
     return tmp;
+}
+
+Page::iterator::iterator(std::byte* ptr, const uint64_t size) : ptr_(ptr), page_size_(size)
+{
+}
+
+std::byte& Page::iterator::operator*()
+{
+    return *ptr_;
+}
+
+Page::iterator& Page::iterator::operator++()
+{
+    ++ptr_;
+    return *this;
+}
+
+Page::iterator Page::iterator::operator++(int)
+{
+    auto tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+Page::iterator Page::iterator::operator+(uint64_t offset)
+{
+    auto tmp = *this;
+    tmp.ptr_ += offset;
+    return tmp;
+}
+
+void Page::iterator::operator+=(uint64_t offset)
+{
+    *this = *this + offset;
+}
+
+Page::iterator Page::iterator::operator-(uint64_t offset)
+{
+    auto tmp = *this;
+    tmp.ptr_ -= offset;
+    return tmp;
+}
+
+bool operator==(const Page::iterator& lhs, const Page::iterator& rhs)
+{
+    return lhs.ptr_ == rhs.ptr_;
+}
+
+bool operator!=(const Page::iterator& lhs, const Page::iterator& rhs)
+{
+    return lhs.ptr_ != rhs.ptr_;
 }
