@@ -21,7 +21,6 @@ TEST(PageReaderTest, sunny_scenario_ReadPage)
     PageReader reader(in_tape_path, page_size);
     auto page = reader.ReadPage();
     EXPECT_EQ(page.size(), page_size);
-    EXPECT_EQ(page.records_number(), 4);
     Page reference = {0x4_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0x1_b, 0x2_b, 0x3_b, 0x4_b};
     EXPECT_TRUE(memcmp(page.data(), reference.data(), page_size) == 0);
 }

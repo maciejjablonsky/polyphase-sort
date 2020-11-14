@@ -12,7 +12,6 @@ TEST(PageWriterTest, sunny_scenario_BytesLengthNotExceeding)
     const int page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size);
-    EXPECT_EQ(page.records_number(), 4);
     EXPECT_NO_THROW(writer.WritePage(std::move(page)));
 }
 
@@ -23,7 +22,6 @@ TEST(PageWriterTest, BytesLengthExceedPageSize)
     const auto page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size + 1);
-    EXPECT_EQ(page.records_number(), 5);
     EXPECT_ANY_THROW(writer.WritePage(std::move(page)));
 }
 
