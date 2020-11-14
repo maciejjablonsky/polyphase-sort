@@ -5,6 +5,8 @@
 #include <vector>
 #include <string_view>
 #include <memory>
+#include "RecordsPage.hpp"
+
 class TapeWriter
 {
   public:
@@ -14,10 +16,12 @@ class TapeWriter
     ~TapeWriter();
 
   private:
+    void PrepareNewPage();
     PageWriter writer_;
     int page_size_;
-    Page preparing_page_;
-    int records_count_;
+    RecordsPage preparing_page_;
+    RecordsPage::iterator preparing_page_iterator_;
+    uint64_t records_count_ = 0;
 };
 
 #endif // TAPEWRITER_HPP

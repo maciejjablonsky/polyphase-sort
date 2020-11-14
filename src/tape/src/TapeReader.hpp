@@ -5,6 +5,9 @@
 #include <string_view>
 #include "Record.hpp"
 #include <optional>
+#include <variant>
+#include <queue>
+#include "RecordsPage.hpp"
 
 class TapeReader
 {
@@ -13,56 +16,45 @@ class TapeReader
     class sentinel
     {
     };
-    class iterator
+    class const_iterator
     {
       public:
-        iterator(std::byte *page_beginning, TapeReader &parent);
-        iterator &operator++();
-        tape_item &operator*();
-        friend int operator-(const iterator &lhs, const iterator &rhs);
-        friend bool operator==(const iterator &lhs, const iterator &rhs);
-        friend bool operator!=(const iterator &lhs, const iterator &rhs);
-        friend bool operator==(const iterator &iter, sentinel);
-        friend bool operator!=(const iterator &iter, sentinel);
+        const_iterator(TapeReader &parent);
+        const_iterator &operator++();
+        const TapeReader::tape_item &operator*();
+        const TapeReader::tape_item &operator->();
+
+        friend bool operator==(const const_iterator &iter, TapeReader::sentinel);
+        friend bool operator!=(const const_iterator &iter, TapeReader::sentinel);
 
       private:
-        bool IsOnLastPage() const;
-        int RecordsReadFromCurrentPage() const;
-        const Page &CurrentPage() const;
-        Page &CurrentPage();
-
-      private:
-        int pointed_record_idx_ = 0;
-        TapeReader &tape_reader_;
-        int bytes_offset_ = 0;
-        int current_page_idx_ = 0;
-        tape_item *ptr_ = nullptr;
-        Record::SerializedRecord *last_ = nullptr;
+        TapeReader * parent_;
     };
+
+    static_assert(std::is_copy_constructible<const_iterator>());
+    static_assert(std::is_copy_assignable<const_iterator>());
+    static_assert(std::is_destructible<const_iterator>());
+    static_assert(std::is_swappable<const_iterator>());
 
   public:
     TapeReader(const std::string_view in_tape_file_path, const int page_size);
-    TapeReader(const std::vector<Page> &pages, const int page_size);
-    iterator begin();
+    TapeReader(std::queue<Page> &&pages);
+    const_iterator cbegin();
+    const_iterator begin() const;
     sentinel end() const;
-    friend class TapeReader::iterator;
-    bool WholeTapeRead() const;
-    std::vector<Page> &GetPages();
-    Page &GetPage(int idx);
-  private:
-    Page &ReadNextPage();
+    sentinel cend();
+
+    friend bool operator==(const const_iterator &iter, TapeReader::sentinel);
+    friend bool operator!=(const const_iterator &iter, TapeReader::sentinel);
 
   private:
-    enum class PagesSource
-    {
-        TAPE_FILE,
-        PREPARED_PAGES
-    };
-    PageReader reader_;
-    std::vector<Page> pages_;
-    int pages_read_;
-    PagesSource pages_source_;
+    void ReadNextPage();
+    bool LastPageLoaded() const;
+
+  private:
+    std::variant<PageReader, std::queue<Page>> source_;
+    RecordsPage current_page_;
+    RecordsPage::const_iterator current_page_iterator_;
 };
-
 
 #endif // TAPE_READER_HPP
