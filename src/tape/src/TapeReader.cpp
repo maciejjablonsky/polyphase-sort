@@ -71,7 +71,7 @@ void TapeReader::ReadNextPage()
                                                           return page;
                                                       }},
                                            source_));
-    current_page_iterator_ = current_page_.begin();
+    current_page_iterator_ = current_page_.cbegin();
 }
 
 TapeReader::const_iterator::const_iterator(TapeReader& parent) : parent_(&parent)
