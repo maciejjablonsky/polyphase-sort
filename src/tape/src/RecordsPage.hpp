@@ -15,6 +15,7 @@ class RecordsPage
       public:
         iterator(Record::SerializedRecord* ptr, RecordsPage& parent);
         iterator& operator++();
+        iterator operator++(int);
         RecordsPage::stored_item& operator*();
         RecordsPage::stored_item& operator->();
 
@@ -44,6 +45,8 @@ class RecordsPage
         uint64_t records_idx_ = 0;
     };
 
+
+
     static_assert(std::is_copy_constructible<const_iterator>());
     static_assert(std::is_copy_assignable<const_iterator>());
     static_assert(std::is_destructible<const_iterator>());
@@ -61,6 +64,8 @@ class RecordsPage
     iterator begin();
     iterator end();
 
+    operator Page();
+    RecordsPage& operator=(Page&& page);
     void WriteStoredRecordsNumber(uint64_t records);
 
   private:

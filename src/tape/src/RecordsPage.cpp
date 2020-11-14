@@ -107,6 +107,13 @@ RecordsPage::iterator& RecordsPage::iterator::operator++()
     return* this;
 }
 
+RecordsPage::iterator RecordsPage::iterator::operator++(int)
+{
+    auto tmp = *this;
+    ++ptr_;
+    return tmp;
+}
+
 RecordsPage::stored_item& RecordsPage::iterator::operator*()
 {
     return *ptr_;
