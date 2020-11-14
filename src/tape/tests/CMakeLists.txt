@@ -2,7 +2,7 @@ set(TARGET_NAME tape_test)
 add_executable(${TARGET_NAME}
      main.cpp
      Record_test.cpp
-     # TapeWriter_test.cpp
+     TapeWriter_test.cpp
      PageWriter_test.cpp
      TestConfig.hpp
      TestConfig.cpp
