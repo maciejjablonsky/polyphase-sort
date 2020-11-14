@@ -3,7 +3,7 @@ add_executable(${TARGET_NAME}
      main.cpp
      Record_test.cpp
      # TapeWriter_test.cpp
-     # PageWriter_test.cpp
+     PageWriter_test.cpp
      TestConfig.hpp
      TestConfig.cpp
      PageReader_test.cpp
