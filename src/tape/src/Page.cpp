@@ -11,9 +11,9 @@ Page::Page(uint64_t page_size) : memory_(page_size)
 {
 }
 
-Page::Page(byte_vector&& memory) : memory_(std::move(memory))
-{
-}
+//Page::Page(byte_vector&& memory) : memory_(std::move(memory))
+//{
+//}
 Page::Page(std::initializer_list<std::byte> list) : memory_(list)
 {
 }

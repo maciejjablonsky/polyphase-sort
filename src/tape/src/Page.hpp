@@ -47,7 +47,6 @@ class Page
 
     Page();
     Page(uint64_t page_size);
-    Page(byte_vector&& memory);
     Page(std::initializer_list<std::byte> list);
     int size() const;
     std::byte* data();
@@ -64,4 +63,11 @@ class Page
   private:
     byte_vector memory_;
 };
+
+static_assert(std::is_move_constructible<Page>());
+static_assert(std::is_move_assignable<Page>());
+static_assert(std::is_copy_assignable<Page>());
+static_assert(std::is_copy_assignable<Page>());
+static_assert(std::is_nothrow_move_assignable<Page>());
+static_assert(std::is_nothrow_move_constructible<Page>());
 #endif // PAGE_HPP
