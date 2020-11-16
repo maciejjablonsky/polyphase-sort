@@ -18,9 +18,16 @@ bool operator==(const SerializedRecord &lhs, const SerializedRecord &rhs);
 struct RuntimeRecord
 {
     time_t creation_time;
+    void operator+=(time_t offset);
+    void operator-=(time_t offset);
+    RuntimeRecord operator+(time_t offset);
+    RuntimeRecord operator-(time_t offset);
+    friend bool operator<(const RuntimeRecord & lhs, const RuntimeRecord& rhs);
 };
 
+
 static_assert(std::is_default_constructible_v<RuntimeRecord>);
+static_assert(std::is_aggregate<RuntimeRecord>());
 
 
 RuntimeRecord GetRandom();
