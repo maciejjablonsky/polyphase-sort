@@ -24,8 +24,7 @@ void TapeWriter::Write(const Record::SerializedRecord& record)
 void TapeWriter::Flush()
 {
     preparing_page_.WriteStoredRecordsNumber(records_count_);
-    writer_.WritePage(std::move(preparing_page_));
-    writer_.Flush();
+    writer_.WritePage(preparing_page_);
 }
 
 TapeWriter::~TapeWriter()
