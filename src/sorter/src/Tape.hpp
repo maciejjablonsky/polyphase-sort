@@ -10,6 +10,10 @@ struct Tape
     uint64_t dummy_series = 0;
     uint64_t series = 0;
     std::string file_path;
+    friend bool operator<(const Tape& lhs, const Tape& rhs)
+    {
+        return lhs.series < rhs.series; 
+    }
 };
 
 static_assert(std::is_default_constructible<Tape>());
