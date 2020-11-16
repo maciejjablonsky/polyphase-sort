@@ -57,6 +57,8 @@ class RecordsPage
     static_assert(std::is_swappable<iterator>());
 
     RecordsPage(Page&& page);
+    RecordsPage(RecordsPage&& page) noexcept = default;
+    RecordsPage& operator=(RecordsPage&& page) noexcept = default;
     const_iterator cbegin();
     const_iterator begin() const;
     const_iterator cend();
@@ -72,5 +74,8 @@ class RecordsPage
     Page page_;
     PageHeader* page_header_;
 };
+
+static_assert(std::is_move_assignable<RecordsPage>());
+static_assert(std::is_move_constructible<RecordsPage>());
 
 #endif // RECORDS_PAGE_HPP

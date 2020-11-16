@@ -6,12 +6,15 @@
 #include <string_view>
 #include <memory>
 #include "RecordsPage.hpp"
+#include <type_traits>
 
 class TapeWriter
 {
   public:
     TapeWriter(const std::string_view tape_path, int disk_page_size);
-    void Write(const Record::SerializedRecord & record);
+    TapeWriter(TapeWriter&& writer) = default;
+    TapeWriter& operator=(TapeWriter&& writer) = default;
+    void Write(const Record::SerializedRecord& record);
     void Flush();
     ~TapeWriter();
 
@@ -23,5 +26,8 @@ class TapeWriter
     RecordsPage::iterator preparing_page_iterator_;
     uint64_t records_count_ = 0;
 };
+
+static_assert(std::is_move_assignable<TapeWriter>());
+static_assert(std::is_move_constructible<TapeWriter>());
 
 #endif // TAPEWRITER_HPP
