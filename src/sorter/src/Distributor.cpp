@@ -6,6 +6,7 @@
 #include <fmt/format.h>
 #include <functional>
 #include "Record.hpp"
+#include "OutTmpTapeGenerator.hpp"
 
 template <typename Container, typename Func>
 auto make_vector(Container&& container, Func&& func) -> std::vector<decltype(func(*container.begin()))>
@@ -51,16 +52,13 @@ std::vector<Tape> Distributor::operator()() const
 
 std::vector<Tape> Distributor::GenerateOutputTapes() const
 {
-    struct out_tape
+    std::vector<Tape> tapes(output_tapes_number_);
+    out_tmp_tape generator;
+    for (int i = 0; i < output_tapes_number_; ++i)
     {
-        Tape operator()()
-        {
-            using namespace std::chrono;
-            auto timestamp = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
-            return {.dummy_series = 0, .series = 0, .file_path = fmt::format("tmp_out_{}.tape", timestamp)};
-        }
-    } generator;
-    return {static_cast<size_t>(output_tapes_number_), generator()};
+        tapes[i] = generator(); 
+    }
+    return tapes;
 }
 
 TapeReader::const_iterator Distributor::WriteSeriesToTape(TapeReader& reader, TapeWriter& writer,
