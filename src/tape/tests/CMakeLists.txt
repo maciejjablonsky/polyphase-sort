@@ -4,8 +4,6 @@ add_executable(${TARGET_NAME}
      Record_test.cpp
      TapeWriter_test.cpp
      PageWriter_test.cpp
-     TestConfig.hpp
-     TestConfig.cpp
      PageReader_test.cpp
      TapeReader_test.cpp
      Page_test.cpp
@@ -13,7 +11,7 @@ add_executable(${TARGET_NAME}
 )
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 
-target_link_libraries(${TARGET_NAME} tape gtest fmt)
+target_link_libraries(${TARGET_NAME} tape gtest fmt test_config)
 add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER Tests)
 

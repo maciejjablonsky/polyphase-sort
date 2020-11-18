@@ -10,6 +10,14 @@ TapeWriter::TapeWriter(const std::string_view tape_path, int disk_page_size)
 
 void TapeWriter::Write(const Record::SerializedRecord& record)
 {
+    if (!is_any_record_saved_)
+    {
+        is_any_record_saved_ = true;
+    }
+    else
+    {
+        ++preparing_page_iterator_;
+    }
 
     if (preparing_page_iterator_ == preparing_page_.end())
     {
@@ -17,15 +25,23 @@ void TapeWriter::Write(const Record::SerializedRecord& record)
         PrepareNewPage();
     }
 
-    *preparing_page_iterator_++ = record;
+    *preparing_page_iterator_ = record;
     ++records_count_;
+}
+
+const Record::SerializedRecord& TapeWriter::LastWrittenRecord()
+{
+    if (!is_any_record_saved_)
+    {
+        return Record::DEFAULT_MAX;
+    }
+    return *preparing_page_iterator_;
 }
 
 void TapeWriter::Flush()
 {
     preparing_page_.WriteStoredRecordsNumber(records_count_);
-    writer_.WritePage(std::move(preparing_page_));
-    writer_.Flush();
+    writer_.WritePage(preparing_page_);
 }
 
 TapeWriter::~TapeWriter()

@@ -12,7 +12,7 @@ TEST(PageWriterTest, sunny_scenario_BytesLengthNotExceeding)
     const int page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size);
-    EXPECT_NO_THROW(writer.WritePage(std::move(page)));
+    EXPECT_NO_THROW(writer.WritePage(page));
 }
 
 TEST(PageWriterTest, BytesLengthExceedPageSize)
@@ -22,7 +22,7 @@ TEST(PageWriterTest, BytesLengthExceedPageSize)
     const auto page_size = 12;
     PageWriter writer(tape_path, page_size);
     ASSERT_EQ(page.size(), page_size + 1);
-    EXPECT_ANY_THROW(writer.WritePage(std::move(page)));
+    EXPECT_ANY_THROW(writer.WritePage(page));
 }
 
 TEST(PageWriterTest, DriveAccessCounterWorks)
@@ -34,7 +34,18 @@ TEST(PageWriterTest, DriveAccessCounterWorks)
     ASSERT_EQ(page.size(), page_size);
 
     EXPECT_EQ(writer.GetHardDriveAccessesNumber(), 0);
-    writer.WritePage(std::move(page));
-    writer.Flush();
+    writer.WritePage(page);
     EXPECT_EQ(writer.GetHardDriveAccessesNumber(), 1);
+}
+
+TEST(PageWriterTest, sunny_scenario_MoveBetweenWrite)
+{
+    const std::string tape_path = TestConfig::GetTmpFilePath();
+    Page page{0x4_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0_b, 0x1_b, 0x2_b, 0x3_b, 0x4_b};
+    const int page_size = 12;
+    PageWriter writer(tape_path, page_size);
+    writer.WritePage(page);
+
+    PageWriter new_writer = std::move(writer);
+    writer.WritePage(page);
 }

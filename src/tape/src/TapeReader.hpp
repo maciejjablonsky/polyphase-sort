@@ -47,6 +47,8 @@ class TapeReader
     friend bool operator==(const const_iterator &iter, TapeReader::sentinel);
     friend bool operator!=(const const_iterator &iter, TapeReader::sentinel);
 
+    bool Empty() const;
+
   private:
     void ReadNextPage();
     bool LastPageLoaded() const;
