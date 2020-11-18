@@ -2,6 +2,7 @@ set(TARGET_NAME sorter_test)
 add_executable(${TARGET_NAME}
      main.cpp
      Distributor_test.cpp
+     Merger_test.cpp
 )
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 
