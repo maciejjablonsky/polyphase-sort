@@ -7,26 +7,28 @@
 #include "Tape.hpp"
 #include <TapeWriter.hpp>
 #include <TapeReader.hpp>
+#include <functional>
+#include <utility>
 
 class Distributor
 {
   public:
-    Distributor(const std::string_view input_tape_file_path, const int output_tapes_number = 2);
+    Distributor(const std::string_view input_tape_file_path, const int page_size, const int output_tapes_number = 2);
     std::vector<Tape> operator()() const;
 
   private:
     std::vector<Tape> GenerateOutputTapes() const;
-    void WriteSeriesToTape(TapeReader & in, const uint64_t series, TapeWriter& out);
-
-    struct Fibonacci
+    TapeReader::const_iterator WriteSeriesToTape(TapeReader& reader, TapeWriter& writer, Tape & out_tape) const;
+    mutable struct Fibonacci
     {
-        int curr;
-        int next;
+        int a;
+        int b;
         Fibonacci();
         int Next();
     } fibonacci;
     const std::string_view input_tape_file_path_;
-    const uint64_t output_tapes_number_ = 0;
+    const int page_size_ = 0;
+    const int output_tapes_number_;
 };
 
 #endif // DISTRIBUTOR_HPP

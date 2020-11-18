@@ -4,16 +4,17 @@
 #include <vector>
 #include <ctime>
 #include <type_traits>
-
+#include <compare>
 namespace Record
 {
-
 struct SerializedRecord
 {
     time_t creation_time;
+    auto operator<=>(const SerializedRecord& other) const = default;
 };
 
-bool operator==(const SerializedRecord &lhs, const SerializedRecord &rhs);
+extern const SerializedRecord DEFAULT_MAX;
+extern const SerializedRecord DEFAULT_MIN;
 
 struct RuntimeRecord
 {
@@ -22,17 +23,17 @@ struct RuntimeRecord
     void operator-=(time_t offset);
     RuntimeRecord operator+(time_t offset);
     RuntimeRecord operator-(time_t offset);
-    friend bool operator<(const RuntimeRecord & lhs, const RuntimeRecord& rhs);
+    friend bool operator<(const RuntimeRecord& lhs, const RuntimeRecord& rhs);
 };
-
 
 static_assert(std::is_default_constructible_v<RuntimeRecord>);
 static_assert(std::is_aggregate<RuntimeRecord>());
 
-
 RuntimeRecord GetRandom();
-SerializedRecord Serialize(const RuntimeRecord &record);
-SerializedRecord Serialize(RuntimeRecord &&record);
-RuntimeRecord Deserialize(const SerializedRecord * serialized_record);
-}; // namespace Record
+SerializedRecord Serialize(const RuntimeRecord& record);
+SerializedRecord Serialize(RuntimeRecord&& record);
+RuntimeRecord Deserialize(const SerializedRecord* serialized_record);
+
+
+};     // namespace Record
 #endif // RECORD_HXX

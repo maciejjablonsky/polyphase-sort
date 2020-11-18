@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <fmt/format.h>
 #include <charconv>
+#include <algorithm>
 
 template <typename T>
 std::optional<T> get_optional_argument_value(const std::vector<std::string_view>& argv,

@@ -15,6 +15,7 @@ class TapeWriter
     TapeWriter(TapeWriter&& writer) = default;
     TapeWriter& operator=(TapeWriter&& writer) = default;
     void Write(const Record::SerializedRecord& record);
+    const Record::SerializedRecord & LastWrittenRecord();
     void Flush();
     ~TapeWriter();
 
@@ -25,6 +26,7 @@ class TapeWriter
     RecordsPage preparing_page_;
     RecordsPage::iterator preparing_page_iterator_;
     uint64_t records_count_ = 0;
+    bool is_any_record_saved_ = false;
 };
 
 static_assert(std::is_move_assignable<TapeWriter>());
