@@ -4,6 +4,7 @@
 #include <utility>
 #include <TestConfig.hpp>
 #include "Distributor.hpp"
+#include <fmt/format.h>
 
 class MergingTest : public testing::TestWithParam<std::pair<std::string /* path */, int /* page size */>>
 {
@@ -11,6 +12,7 @@ class MergingTest : public testing::TestWithParam<std::pair<std::string /* path 
     MergingTest()
         : input_path_(TestConfig::GetResourcePath() + GetParam().first), page_size_(GetParam().second)
     {
+        fmt::print("[{:^10}] {}\n", "TAPE PATH", input_path_);
         Distributor distributor(input_path_, page_size_);
         distributed_tapes_ = distributor();
 
@@ -50,7 +52,8 @@ TEST_P(MergingTest, sunny_scenario_CheckIfTapeIsSortedAfterMerging)
 {
     TapeReader reader(output_path_, page_size_);
     auto iter = reader.begin();
-    auto prev_record = *iter++;
+    auto prev_record = *iter;
+    ++iter;
     for (const auto & record : reader)
     {
         EXPECT_LE(prev_record, record);
