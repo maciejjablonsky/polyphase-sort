@@ -1,10 +1,10 @@
-del /f/q build\*
-rmdir /q/s build
-mkdir build
-cd build
-cmake .. -DTESTING=1
+del /f/q ..\build-polyphase-sort\*
+rmdir /q/s ..\build-polyphase-sort
+mkdir ..\build-polyphase-sort
+cd ..\build-polyphase-sort
+cmake ..\polyphase-sort -DTESTING=1
 rem start cmake --build . -j --config Release
 rem start cmake --build . -j --config Debug
 start polyphase_sort.sln
-code ..
-cd ..
+cd ..\polyphase-sort
+code .
