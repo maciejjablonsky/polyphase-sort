@@ -17,11 +17,14 @@ void Merger::operator()()
 {
     distributed_tapes_.push_back(out_tmp_tape()());
     std::vector<std::reference_wrapper<Tape>> tapes{distributed_tapes_.begin(), distributed_tapes_.end()};
-
+    shorter_reader_ = std::make_unique<TapeReader>(distributed_tapes_.at(1).file_path, page_size_);
     while (std::count_if(tapes.begin(), tapes.end(), [](const Tape& tape) { return tape.series > 0; }) > 1)
     {
         std::sort(tapes.begin(), tapes.end(), std::greater<Tape>());
+        longer_reader_ = std::make_unique<TapeReader>(tapes.front().get().file_path, page_size_);
+        output_writer_ = std::make_unique<TapeWriter>(tapes.back().get().file_path, page_size_);
         MergePhase(tapes.at(0), tapes.at(1), tapes.back());
+        shorter_reader_ = std::move(longer_reader_);
     }
 
     std::sort(tapes.begin(), tapes.end(), std::less_equal<Tape>());
@@ -78,21 +81,18 @@ void Merger::PassSeries(TapeReader& src, TapeWriter& dst)
 
 void Merger::MergePhase(Tape& longer, Tape& shorter, Tape& output)
 {
-    TapeReader shorter_reader(shorter.file_path, page_size_);
-    TapeReader longer_reader(longer.file_path, page_size_);
-    TapeWriter output_writer(output.file_path, page_size_);
-
     while (longer.dummy_series > 0)
     {
-        PassSeries(shorter_reader, output_writer);
+        PassSeries(*shorter_reader_, *output_writer_);
         --shorter.series;
         --longer.dummy_series;
         --longer.series;
+        ++output.series;
     }
 
-    while (shorter_reader.cbegin() != shorter_reader.cend())
+    while (shorter_reader_->cbegin() != shorter_reader_->cend())
     {
-        MergeSeries(shorter_reader, longer_reader, output_writer);
+        MergeSeries(*longer_reader_, *shorter_reader_, *output_writer_);
         --shorter.series;
         --longer.series;
         ++output.series;

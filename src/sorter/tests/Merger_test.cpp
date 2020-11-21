@@ -5,6 +5,7 @@
 #include <TestConfig.hpp>
 #include "Distributor.hpp"
 #include <fmt/format.h>
+#include <fstream>
 
 class MergingTest : public testing::TestWithParam<std::pair<std::string /* path */, int /* page size */>>
 {
@@ -54,7 +55,7 @@ TEST_P(MergingTest, sunny_scenario_CheckIfTapeIsSortedAfterMerging)
     auto iter = reader.begin();
     auto prev_record = *iter;
     ++iter;
-    for (const auto & record : reader)
+    for (const auto& record : reader)
     {
         EXPECT_LE(prev_record, record);
         prev_record = record;
