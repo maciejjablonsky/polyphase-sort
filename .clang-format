@@ -1,6 +1,10 @@
+---
+BasedOnStyle:  Google
+---
+Language: Cpp
 ColumnLimit: 110
 AlignTrailingComments: true
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
 BreakBeforeBinaryOperators: false
@@ -9,3 +13,6 @@ SortIncludes: false
 NamespaceIndentation: Inner
 BreakBeforeBraces: Allman
 PointerAlignment: Left
+BreakConstructorInitializersBeforeComma: false
+KeepEmptyLinesAtTheStartOfBlocks: true
+Standard:       Latest

@@ -61,3 +61,28 @@ TEST_P(MergingTest, sunny_scenario_CheckIfTapeIsSortedAfterMerging)
         prev_record = record;
     }
 }
+
+TEST(MerginPreparedTape, NoRecordsOmitted)
+{
+    const std::string input_tape_path =
+        TestConfig::GetResourcePath() + "descending_series_page_size_64.records";
+    Distributor distributor(input_tape_path, 64);
+    auto distributed_tapes = distributor();
+
+    auto output_path = TestConfig::GetTmpDirPath() + "output_tape.records";
+    Merger merger(distributed_tapes, output_path, 64);
+    merger();
+
+    TapeReader tape_reader(output_path, 64);
+    const std::string reference_tape_path =
+        TestConfig::GetResourcePath() + "reference_descending_page_size_64.records";
+    TapeReader reference_reader(reference_tape_path, 64);
+    auto actual = tape_reader.cbegin();
+    auto reference = reference_reader.cbegin();
+    while (reference != reference_reader.cend())
+    {
+        EXPECT_EQ(*actual, *reference);
+        ++actual;
+        ++reference;
+    }
+}

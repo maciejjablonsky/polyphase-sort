@@ -120,3 +120,39 @@ TEST_P(DummySeriesDistributionTest, sunny_scenario_TapesHaveExpectedDummySeriesN
         EXPECT_EQ(distributed_tapes[i].dummy_series, expected_dummy_series_[i]);
     }
 }
+
+TEST(TapesDistributionTest, CheckIfCreatedEqualToPrepared)
+{
+    const std::string input_tape_path =
+        TestConfig::GetResourcePath() + "descending_series_page_size_64.records";
+    Distributor distributor(input_tape_path, 64);
+    auto tapes = distributor();
+    {
+        TapeReader actual_reader(tapes[0].file_path, 64);
+        const std::string expected_tape_path =
+            TestConfig::GetResourcePath() + "longer_distributed_tape_page_size_64.records";
+        TapeReader expected_reader(expected_tape_path, 64);
+        auto actual = actual_reader.cbegin();
+        auto expected = expected_reader.cbegin();
+        while (expected != expected_reader.cend())
+        {
+            EXPECT_EQ(*actual, *expected);
+            ++actual;
+            ++expected;
+        }
+    }
+    {
+        TapeReader actual_reader(tapes[1].file_path, 64);
+        const std::string expected_tape_path =
+            TestConfig::GetResourcePath() + "shorter_distributed_tape_page_size_64.records";
+        TapeReader expected_reader(expected_tape_path, 64);
+        auto actual = actual_reader.cbegin();
+        auto expected = expected_reader.cbegin();
+        while (expected != expected_reader.cend())
+        {
+            EXPECT_EQ(*actual, *expected);
+            ++actual;
+            ++expected;
+        }
+    }
+}

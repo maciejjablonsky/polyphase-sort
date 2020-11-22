@@ -20,70 +20,86 @@ void Merger::operator()()
     shorter_reader_ = std::make_unique<TapeReader>(distributed_tapes_.at(1).file_path, page_size_);
     while (std::count_if(tapes.begin(), tapes.end(), [](const Tape& tape) { return tape.series > 0; }) > 1)
     {
+        std::reverse(tapes.begin(), tapes.end());
         std::sort(tapes.begin(), tapes.end(), std::greater<Tape>());
         longer_reader_ = std::make_unique<TapeReader>(tapes.front().get().file_path, page_size_);
-        output_writer_ = std::make_unique<TapeWriter>(tapes.back().get().file_path, page_size_);
         MergePhase(tapes.at(0), tapes.at(1), tapes.back());
         shorter_reader_ = std::move(longer_reader_);
     }
 
-    std::sort(tapes.begin(), tapes.end(), std::less_equal<Tape>());
+    std::sort(tapes.begin(), tapes.end(), std::greater<Tape>());
     auto tmp_output_file_path = tapes.front().get().file_path;
     std::filesystem::rename(tmp_output_file_path.c_str(), output_tape_path_);
 }
 
-void Merger::MergeSeries(TapeReader& lhs, TapeReader& rhs, TapeWriter& output)
+void Merger::MergeOneSeries(TapeReader& lhs_reader, TapeReader& rhs_reader, TapeWriter& output_writer)
 {
-    auto lhs_iter = lhs.cbegin();
-    auto rhs_iter = rhs.cbegin();
-    auto last_record = *lhs_iter;
-    while (lhs_iter != lhs.cend() && rhs_iter != rhs.cend())
+    auto lhs_it = lhs_reader.cbegin();
+    auto rhs_it = rhs_reader.cbegin();
+    Record::SerializedRecord last_lhs_record = Record::DEFAULT_MIN;
+    Record::SerializedRecord last_rhs_record = Record::DEFAULT_MIN;
+    enum class series_state
     {
-        if (*lhs_iter <= *rhs_iter)
+        IN,
+        END
+    };
+    auto lhs_state =
+        (lhs_it != lhs_reader.cend() && last_lhs_record <= *lhs_it) ? series_state::IN : series_state::END;
+    auto rhs_state =
+        (rhs_it != rhs_reader.cend() && last_rhs_record <= *rhs_it) ? series_state::IN : series_state::END;
+
+    while (true)
+    {
+        if (lhs_state == series_state::END && rhs_state == series_state::IN)
         {
-            last_record = *lhs_iter;
-            ++lhs_iter;
-            output.Write(last_record);
+            PassOneSeries(rhs_reader, output_writer);
+            break;
+        }
+        else if (rhs_state == series_state::END && lhs_state == series_state::IN)
+        {
+            PassOneSeries(lhs_reader, output_writer);
+            break;
         }
         else
         {
-            last_record = *rhs_iter;
-            ++rhs_iter;
-            output.Write(last_record);
+            if (*lhs_it <= *rhs_it)
+
+            {
+                last_lhs_record = *lhs_it;
+                ++lhs_it;
+                output_writer.Write(last_lhs_record);
+            }
+            else
+            {
+                last_rhs_record = *rhs_it;
+                ++rhs_it;
+                output_writer.Write(last_rhs_record);
+            }
         }
-    }
-    while (lhs_iter != lhs.cend() && last_record <= *lhs_iter)
-    {
-        last_record = *lhs_iter;
-        ++lhs_iter;
-        output.Write(last_record);
-    }
-    while (rhs_iter != rhs.cend() && last_record <= *rhs_iter)
-    {
-        last_record = *rhs_iter;
-        ++rhs_iter;
-        output.Write(last_record);
+        lhs_state = (lhs_it != lhs_reader.cend() && last_lhs_record <= *lhs_it) ? series_state::IN
+                                                                                : series_state::END;
+        rhs_state = (rhs_it != rhs_reader.cend() && last_rhs_record <= *rhs_it) ? series_state::IN
+                                                                                : series_state::END;
     }
 }
-void Merger::PassSeries(TapeReader& src, TapeWriter& dst)
+void Merger::PassOneSeries(TapeReader& src, TapeWriter& dst)
 {
-    auto iter = src.cbegin();
-    auto last_record = *iter;
-    dst.Write(last_record);
-    ++iter;
-    while (iter != src.cend() && last_record <= *iter)
+    auto src_it = src.cbegin();
+    auto last_record = dst.LastWrittenRecord();
+    do
     {
-        last_record = *iter;
-        ++iter;
+        last_record = *src_it;
+        ++src_it;
         dst.Write(last_record);
-    }
+    } while (src_it != src.cend() && last_record <= *src_it);
 }
 
 void Merger::MergePhase(Tape& longer, Tape& shorter, Tape& output)
 {
+    TapeWriter output_writer(output.file_path, page_size_);
     while (longer.dummy_series > 0)
     {
-        PassSeries(*shorter_reader_, *output_writer_);
+        PassOneSeries(*shorter_reader_, output_writer);
         --shorter.series;
         --longer.dummy_series;
         --longer.series;
@@ -92,7 +108,7 @@ void Merger::MergePhase(Tape& longer, Tape& shorter, Tape& output)
 
     while (shorter_reader_->cbegin() != shorter_reader_->cend())
     {
-        MergeSeries(*longer_reader_, *shorter_reader_, *output_writer_);
+        MergeOneSeries(*longer_reader_, *shorter_reader_, output_writer);
         --shorter.series;
         --longer.series;
         ++output.series;

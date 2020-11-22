@@ -15,13 +15,12 @@ class Merger
     void operator()();
 
   private:
-    void MergeSeries(TapeReader& longer_reader, TapeReader& shorter_reader, TapeWriter& output_writer);
-    void PassSeries(TapeReader& src, TapeWriter& dst);
+    void MergeOneSeries(TapeReader& lhs_reader, TapeReader& rhs_reader, TapeWriter& output_writer);
+    void PassOneSeries(TapeReader& src, TapeWriter& dst);
     void MergePhase(Tape& longer, Tape& shorter, Tape& output);
 
     std::unique_ptr<TapeReader> longer_reader_;
     std::unique_ptr<TapeReader> shorter_reader_;
-    std::unique_ptr<TapeWriter> output_writer_;
     std::vector<Tape>& distributed_tapes_;
     const std::string_view output_tape_path_;
     const int page_size_;
