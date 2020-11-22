@@ -1,3 +1,5 @@
 set(TARGET_NAME tape_generator)
 add_executable(${TARGET_NAME} main.cpp TapeGenerator.cpp TapeGenerator.hpp)
 target_link_libraries(${TARGET_NAME} fmt tape)
+set_target_properties(tape_generator PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
+set_target_properties(tape_generator PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)

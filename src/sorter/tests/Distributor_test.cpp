@@ -9,14 +9,27 @@
 
 using namespace std::string_literals;
 
-struct DataDefinition
+struct DistributionTestParams
 {
     std::string path;
     int page_size;
     std::vector<int> expected_series_numbers;
+
+    friend std::ostream& operator<<(std::ostream& os, const DistributionTestParams& params)
+    {
+        os << fmt::format("({{path: {}}}, {{page_size: {}}}, {{expected_series_numbers: ", params.path, params.page_size);
+        os << '{';
+        for (int i = 0; const auto num : params.expected_series_numbers)
+        {
+            ++i;
+            os << fmt::format("{}{}", num, (i < params.expected_series_numbers.size() ? ", " : ""));
+        }
+        os << "}})\n";
+        return os;
+    }
 };
 
-class DistributionTest : public ::testing::TestWithParam<DataDefinition>
+class DistributionTest : public ::testing::TestWithParam<DistributionTestParams>
 {
   public:
     DistributionTest()
@@ -32,25 +45,25 @@ class DistributionTest : public ::testing::TestWithParam<DataDefinition>
     const std::vector<int> expected_series_numbers_;
 };
 
-INSTANTIATE_TEST_CASE_P(DistributionExpectedTapesOutputTest, DistributionTest,
-                        ::testing::ValuesIn(std::vector<DataDefinition>{
-                            {"no_coalescing_series_6_with_2_dummy_page_size_64.records", 64, {5, 3}},
-                            {"01_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
-                            {"02_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
-                            {"prepared_series_5_records_5_page_size_64.records", 64, {3, 2}},
-                            {"01_series_25_page_size_64.records", 64, {21, 13}},
-                            {"01_series_60_page_size_64.records", 64, {55, 34}},
-                            {"01_series_120_page_size_64.records", 64, {89, 55}},
-                            {"01_series_512_page_size_4096.records", 4096, {377, 233}},
-                            {"02_series_25_page_size_64.records", 64, {21, 13}},
-                            {"02_series_60_page_size_64.records", 64, {55, 34}},
-                            {"02_series_120_page_size_64.records", 64, {89, 55}},
-                            {"02_series_512_page_size_4096.records", 4096, {377, 233}},
-                            {"03_series_25_page_size_64.records", 64, {21, 13}},
-                            {"03_series_60_page_size_64.records", 64, {55, 34}},
-                            {"03_series_120_page_size_64.records", 64, {89, 55}},
-                            {"fibonacci_series_2584_page_size_4096.records", 4096, {1597, 987}},
-                            {"fibonacci_series_4181_page_size_4096.records", 4096, {2584, 1597}}}));
+INSTANTIATE_TEST_SUITE_P(
+    DistributionExpectedTapesOutputTest, DistributionTest,
+    ::testing::Values(DistributionTestParams{"no_coalescing_series_6_with_2_dummy_page_size_64.records", 64, {5, 3}},
+                      DistributionTestParams{"01_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
+                      DistributionTestParams{"02_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
+                      DistributionTestParams{"prepared_series_5_records_5_page_size_64.records", 64, {3, 2}},
+                      DistributionTestParams{"01_series_25_page_size_64.records", 64, {21, 13}},
+                      DistributionTestParams{"01_series_60_page_size_64.records", 64, {55, 34}},
+                      DistributionTestParams{"01_series_120_page_size_64.records", 64, {89, 55}},
+                      DistributionTestParams{"01_series_512_page_size_4096.records", 4096, {377, 233}},
+                      DistributionTestParams{"02_series_25_page_size_64.records", 64, {21, 13}},
+                      DistributionTestParams{"02_series_60_page_size_64.records", 64, {55, 34}},
+                      DistributionTestParams{"02_series_120_page_size_64.records", 64, {89, 55}},
+                      DistributionTestParams{"02_series_512_page_size_4096.records", 4096, {377, 233}},
+                      DistributionTestParams{"03_series_25_page_size_64.records", 64, {21, 13}},
+                      DistributionTestParams{"03_series_60_page_size_64.records", 64, {55, 34}},
+                      DistributionTestParams{"03_series_120_page_size_64.records", 64, {89, 55}},
+                      DistributionTestParams{"fibonacci_series_2584_page_size_4096.records", 4096, {1597, 987}},
+                      DistributionTestParams{"fibonacci_series_4181_page_size_4096.records", 4096, {2584, 1597}}));
 
 TEST_P(DistributionTest, sunny_scenario_ReturnTapesInDescendingOrder)
 {
@@ -105,5 +118,41 @@ TEST_P(DummySeriesDistributionTest, sunny_scenario_TapesHaveExpectedDummySeriesN
     for (int i = 0; i < expected_dummy_series_.size(); ++i)
     {
         EXPECT_EQ(distributed_tapes[i].dummy_series, expected_dummy_series_[i]);
+    }
+}
+
+TEST(TapesDistributionTest, CheckIfCreatedEqualToPrepared)
+{
+    const std::string input_tape_path =
+        TestConfig::GetResourcePath() + "descending_series_page_size_64.records";
+    Distributor distributor(input_tape_path, 64);
+    auto tapes = distributor();
+    {
+        TapeReader actual_reader(tapes[0].file_path, 64);
+        const std::string expected_tape_path =
+            TestConfig::GetResourcePath() + "longer_distributed_tape_page_size_64.records";
+        TapeReader expected_reader(expected_tape_path, 64);
+        auto actual = actual_reader.cbegin();
+        auto expected = expected_reader.cbegin();
+        while (expected != expected_reader.cend())
+        {
+            EXPECT_EQ(*actual, *expected);
+            ++actual;
+            ++expected;
+        }
+    }
+    {
+        TapeReader actual_reader(tapes[1].file_path, 64);
+        const std::string expected_tape_path =
+            TestConfig::GetResourcePath() + "shorter_distributed_tape_page_size_64.records";
+        TapeReader expected_reader(expected_tape_path, 64);
+        auto actual = actual_reader.cbegin();
+        auto expected = expected_reader.cbegin();
+        while (expected != expected_reader.cend())
+        {
+            EXPECT_EQ(*actual, *expected);
+            ++actual;
+            ++expected;
+        }
     }
 }

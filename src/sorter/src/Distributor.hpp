@@ -17,8 +17,9 @@ class Distributor
     std::vector<Tape> operator()() const;
 
   private:
+    void PassSeries(TapeReader& src, TapeWriter& dst) const;
     std::vector<Tape> GenerateOutputTapes() const;
-    TapeReader::const_iterator WriteSeriesToTape(TapeReader& reader, TapeWriter& writer, Tape & out_tape) const;
+    TapeReader::const_iterator DistributeSeriesToTape(TapeReader& reader, TapeWriter& writer, Tape & out_tape) const;
     mutable struct Fibonacci
     {
         int a;

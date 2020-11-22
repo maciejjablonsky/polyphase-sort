@@ -1,3 +1,5 @@
 set(SOURCES main.cpp Info.hpp Info.cpp)
 add_executable(tape_info ${SOURCES})
 target_link_libraries(tape_info tape fmt)
+set_target_properties(tape_info PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
+set_target_properties(tape_info PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
