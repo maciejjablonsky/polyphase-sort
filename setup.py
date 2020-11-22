@@ -11,7 +11,7 @@ parser.add_argument('--open-code', help='Open repository in visual studio code',
 parser.add_argument('--open-vs', help='Open solution in visual studio if on Windows', action='store_true')
 parser.add_argument('--build-release', help='Build release target with tests', action='store_true')
 parser.add_argument('--build-debug', help='Build debug target', action='store_true')
-args = parser.parse_args(sys.argv[1:])
+args = parser.parse_args()
 
 build_path = "../build-polyphase-sort"
 current_dir = os.getcwd()
