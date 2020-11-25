@@ -5,6 +5,7 @@
 #include <ctime>
 #include <type_traits>
 #include <compare>
+#include <string>
 namespace Record
 {
 struct SerializedRecord
@@ -28,7 +29,7 @@ struct RuntimeRecord
 
 static_assert(std::is_default_constructible_v<RuntimeRecord>);
 static_assert(std::is_aggregate<RuntimeRecord>());
-
+std::string to_string(const SerializedRecord& serialized_record);
 RuntimeRecord GetRandom();
 SerializedRecord Serialize(const RuntimeRecord& record);
 SerializedRecord Serialize(RuntimeRecord&& record);

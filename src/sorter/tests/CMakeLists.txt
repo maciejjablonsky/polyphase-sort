@@ -6,7 +6,7 @@ add_executable(${TARGET_NAME}
 )
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 
-target_link_libraries(${TARGET_NAME} tape gtest fmt test_config sorter)
+target_link_libraries(${TARGET_NAME} tape gtest fmt test_config sorter logger)
 add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/data ${CMAKE_CURRENT_BINARY_DIR}/tmp)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER Tests)
 

@@ -7,6 +7,9 @@
 #include "Tape.hpp"
 #include <filesystem>
 #include <compare>
+#include <logger/Logger.hpp>
+#include "Record.hpp"
+using namespace std::string_view_literals;
 
 Merger::Merger(std::vector<Tape>& distributed_tapes, const std::string_view output_tape_path, int page_size)
     : distributed_tapes_(distributed_tapes), output_tape_path_(output_tape_path), page_size_(page_size)
@@ -18,13 +21,39 @@ void Merger::operator()()
     distributed_tapes_.push_back(out_tmp_tape()());
     std::vector<std::reference_wrapper<Tape>> tapes{distributed_tapes_.begin(), distributed_tapes_.end()};
     shorter_reader_ = std::make_unique<TapeReader>(distributed_tapes_.at(1).file_path, page_size_);
+#ifdef ENABLE_PRINT
+    int phase_number = 0;
+#endif  // ENABLE_PRINT
     while (std::count_if(tapes.begin(), tapes.end(), [](const Tape& tape) { return tape.series > 0; }) > 1)
     {
+#ifdef ENABLE_LOGGING
+        Logger::Dump("Start of merge phase."sv);
+#endif  // ENABLE_LOGGING
+
         std::reverse(tapes.begin(), tapes.end());
         std::sort(tapes.begin(), tapes.end(), std::greater<Tape>());
         longer_reader_ = std::make_unique<TapeReader>(tapes.front().get().file_path, page_size_);
         MergePhase(tapes.at(0), tapes.at(1), tapes.back());
         shorter_reader_ = std::move(longer_reader_);
+
+#ifdef ENABLE_PRINT
+        [&]() {
+            TapeReader tape(tapes.back().get().file_path, page_size_);
+            fmt::print("Phase number {:02} | Tape content:\n", phase_number);
+            for (int i = 0; const auto& record : tape)
+            {
+                fmt::print("{:<5} ", record.creation_time);
+                if (++i % 20 == 0)
+                {
+                    fmt::print("\n");
+                }
+            }
+            fmt::print("\n");
+        }();
+#endif  // ENABLE_PRINT
+#ifdef ENABLE_LOGGING
+        Logger::Dump("End of merge phase."sv);
+#endif  // ENABLE_LOGGING
     }
 
     std::sort(tapes.begin(), tapes.end(), std::greater<Tape>());

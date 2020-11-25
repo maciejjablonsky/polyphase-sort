@@ -8,6 +8,10 @@
 #include "Record.hpp"
 #include "OutTmpTapeGenerator.hpp"
 #include <compare>
+#include <logger/Logger.hpp>
+
+using namespace std::string_view_literals;
+
 
 template <typename Container, typename Func>
 auto make_vector(Container&& container, Func&& func) -> std::vector<decltype(func(*container.begin()))>
@@ -31,6 +35,9 @@ Distributor::Distributor(const std::string_view input_tape_file_path, const int 
 
 std::vector<Tape> Distributor::operator()() const
 {
+#ifdef ENABLE_LOGGING
+    Logger::Dump(fmt::format("Started distribution of tape {}", input_tape_file_path_));
+#endif  // ENABLED_LOGGING
     auto out_tapes = GenerateOutputTapes();
     TapeReader reader(input_tape_file_path_, page_size_);
 
@@ -49,6 +56,11 @@ std::vector<Tape> Distributor::operator()() const
     }
 
     std::sort(out_tapes.begin(), out_tapes.end(), std::greater<>());
+
+#ifdef ENABLE_LOGGING
+    Logger::Dump(fmt::format("End of distribution of tape {}", input_tape_file_path_));
+#endif  // ENABLED_LOGGING
+
     return out_tapes;
 }
 

@@ -6,11 +6,22 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--clean', help='Remove binary directory before building', dest='clean', action='store_true')
-parser.add_argument('--open-code', help='Open repository in visual studio code', action='store_true')
-parser.add_argument('--open-vs', help='Open solution in visual studio if on Windows', action='store_true')
-parser.add_argument('--build-release', help='Build release target with tests', action='store_true')
-parser.add_argument('--build-debug', help='Build debug target', action='store_true')
+parser.add_argument('--clean', help='Remove binary directory before building',
+                    dest='clean', action='store_true')
+parser.add_argument(
+    '--open-code', help='Open repository in visual studio code', action='store_true')
+parser.add_argument(
+    '--open-vs', help='Open solution in visual studio if on Windows', action='store_true')
+parser.add_argument(
+    '--build-release', help='Build release target with tests', action='store_true')
+parser.add_argument(
+    '--build-debug', help='Build debug target', action='store_true')
+parser.add_argument('--enable-printing',
+                    help='Build target with printing tape after each phase', action='store_true')
+parser.add_argument('--enable-logging',
+                    help='Build target with logging', action='store_true')
+parser.add_argument(
+    '--tests', help='Run tests after release build', action='store_true')
 args = parser.parse_args()
 
 build_path = "../build-polyphase-sort"
@@ -25,12 +36,19 @@ if args.open_code:
     subprocess.run(['code', current_dir], stderr=subprocess.STDOUT, shell=True)
 
 os.chdir(build_path)
-cmake_build_cmd = ['cmake', '../polyphase-sort', '-DTESTING=1']
+cmake_build_cmd = ['cmake', '../polyphase-sort']
+
+cmake_build_cmd.append( '-DTESTING={}'.format(int(args.tests)))
+cmake_build_cmd.append('-DENABLE_LOGGING={}'.format(int(args.enable_logging)))
+cmake_build_cmd.append('-DENABLE_PRINT={}'.format(int(args.enable_printing)))
+
 subprocess.check_call(cmake_build_cmd, stderr=subprocess.STDOUT, shell=True)
 if args.open_vs:
     os.startfile('polyphase_sort.sln')
 if args.build_release:
-    subprocess.check_call(['cmake', '--build', '.', '--config', 'Release', '-j'], stderr=subprocess.STDOUT, shell=True)
+    subprocess.check_call(['cmake', '--build', '.', '--config',
+                           'Release', '-j'], stderr=subprocess.STDOUT, shell=True)
 if args.build_debug:
-    subprocess.check_call(['cmake', '--build', '.', '--config', 'Debug', '-j'], stderr=subprocess.STDOUT, shell=True)
+    subprocess.check_call(['cmake', '--build', '.', '--config',
+                           'Debug', '-j'], stderr=subprocess.STDOUT, shell=True)
 os.chdir(current_dir)
