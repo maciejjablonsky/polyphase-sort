@@ -9,6 +9,7 @@
 #include <logger/Logger.hpp>
 
 using namespace std::string_literals;
+#undef ENABLE_PRINT
 
 namespace
 {
