@@ -3,6 +3,7 @@
 
 #include <IHardDriveAccessor.hpp>
 #include <string_view>
+#include <string>
 #include <fstream>
 #include "Page.hpp"
 class PageReader : public IHardDriveAccessor
@@ -21,6 +22,7 @@ class PageReader : public IHardDriveAccessor
     const std::ifstream::pos_type tape_file_last_byte_pos_;
     const int page_size_ = 0;
     int hard_drive_accesses_ = 0;
+    std::string input_file_path_;
 };
 
 #endif // PAGE_READER_HPP

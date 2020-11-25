@@ -2,19 +2,22 @@
 #include <ctime>
 #include <random>
 #include <cmath>
+#include <fmt/format.h>
+
 namespace Record
 {
 const Record::SerializedRecord DEFAULT_MAX = {std::numeric_limits<time_t>::max()};
 const Record::SerializedRecord DEFAULT_MIN = {std::numeric_limits<time_t>::min()};
-} // namespace Record
+}  // namespace Record
 
 bool Record::operator<(const RuntimeRecord& lhs, const RuntimeRecord& rhs)
 {
     return lhs.creation_time < rhs.creation_time;
 }
 
-Record::RuntimeRecord Record::GetRandom()
-{
+std::string Record::to_string(const SerializedRecord& serialized_record) { return fmt::format("{}", serialized_record.creation_time); }
+
+Record::RuntimeRecord Record::GetRandom() {
     return {std::abs(std::rand())};
 }
 

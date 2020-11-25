@@ -6,13 +6,31 @@
 #include "Distributor.hpp"
 #include <fmt/format.h>
 #include <fstream>
+#include <logger/Logger.hpp>
+
+
+namespace
+{
+std::string replace(std::string& str, const std::string& from, const std::string& to)
+{
+    std::string copy = str;
+    size_t start_pos = copy.find(from);
+    if (start_pos == std::string::npos)
+    {
+        return copy;
+    }
+    copy.replace(start_pos, from.length(), to);
+    return copy;
+}
+}  // namespace
 
 class MergingTest : public testing::TestWithParam<std::pair<std::string /* path */, int /* page size */>>
 {
-  public:
+   public:
     MergingTest()
         : input_path_(TestConfig::GetResourcePath() + GetParam().first), page_size_(GetParam().second)
     {
+        Logger::SetOutputPath(replace(TestConfig::GetTmpDirPath() + GetParam().first, ".records", ".log"));
         fmt::print("[{:^10}] {}\n", "TAPE PATH", input_path_);
         Distributor distributor(input_path_, page_size_);
         distributed_tapes_ = distributor();
@@ -22,7 +40,7 @@ class MergingTest : public testing::TestWithParam<std::pair<std::string /* path 
         merger();
     }
 
-  protected:
+   protected:
     std::string output_path_;
     std::string input_path_;
     std::vector<Tape> distributed_tapes_;
@@ -66,6 +84,8 @@ TEST(MerginPreparedTape, NoRecordsOmitted)
 {
     const std::string input_tape_path =
         TestConfig::GetResourcePath() + "descending_series_page_size_64.records";
+    //Logger::SetOutputPath(TestConfig::GetTmpDirPath() + "descending_series_page_size_64.log");
+
     Distributor distributor(input_tape_path, 64);
     auto distributed_tapes = distributor();
 

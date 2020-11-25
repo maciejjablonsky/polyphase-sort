@@ -6,8 +6,24 @@
 #include <string>
 #include <fmt/format.h>
 #include <cstring>
+#include <logger/Logger.hpp>
 
 using namespace std::string_literals;
+
+namespace
+{
+std::string replace(std::string& str, const std::string& from, const std::string& to)
+{
+    std::string copy = str;
+    size_t start_pos = copy.find(from);
+    if (start_pos == std::string::npos)
+    {
+        return copy;
+    }
+    copy.replace(start_pos, from.length(), to);
+    return copy;
+}
+}  // namespace
 
 struct DistributionTestParams
 {
@@ -17,7 +33,8 @@ struct DistributionTestParams
 
     friend std::ostream& operator<<(std::ostream& os, const DistributionTestParams& params)
     {
-        os << fmt::format("({{path: {}}}, {{page_size: {}}}, {{expected_series_numbers: ", params.path, params.page_size);
+        os << fmt::format("({{path: {}}}, {{page_size: {}}}, {{expected_series_numbers: ", params.path,
+                          params.page_size);
         os << '{';
         for (int i = 0; const auto num : params.expected_series_numbers)
         {
@@ -31,15 +48,17 @@ struct DistributionTestParams
 
 class DistributionTest : public ::testing::TestWithParam<DistributionTestParams>
 {
-  public:
+   public:
     DistributionTest()
-        : tape_path_(TestConfig::GetResourcePath() + GetParam().path), page_size_(GetParam().page_size),
+        : tape_path_(TestConfig::GetResourcePath() + GetParam().path),
+          page_size_(GetParam().page_size),
           expected_series_numbers_(GetParam().expected_series_numbers)
     {
+        Logger::SetOutputPath(replace(TestConfig::GetTmpDirPath() + GetParam().path, ".records", ".log"));
         fmt::print("[{:^10}] {}\n", "TAPE PATH", tape_path_);
     }
 
-  protected:
+   protected:
     const std::string tape_path_;
     const int page_size_;
     const std::vector<int> expected_series_numbers_;
@@ -47,23 +66,24 @@ class DistributionTest : public ::testing::TestWithParam<DistributionTestParams>
 
 INSTANTIATE_TEST_SUITE_P(
     DistributionExpectedTapesOutputTest, DistributionTest,
-    ::testing::Values(DistributionTestParams{"no_coalescing_series_6_with_2_dummy_page_size_64.records", 64, {5, 3}},
-                      DistributionTestParams{"01_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
-                      DistributionTestParams{"02_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
-                      DistributionTestParams{"prepared_series_5_records_5_page_size_64.records", 64, {3, 2}},
-                      DistributionTestParams{"01_series_25_page_size_64.records", 64, {21, 13}},
-                      DistributionTestParams{"01_series_60_page_size_64.records", 64, {55, 34}},
-                      DistributionTestParams{"01_series_120_page_size_64.records", 64, {89, 55}},
-                      DistributionTestParams{"01_series_512_page_size_4096.records", 4096, {377, 233}},
-                      DistributionTestParams{"02_series_25_page_size_64.records", 64, {21, 13}},
-                      DistributionTestParams{"02_series_60_page_size_64.records", 64, {55, 34}},
-                      DistributionTestParams{"02_series_120_page_size_64.records", 64, {89, 55}},
-                      DistributionTestParams{"02_series_512_page_size_4096.records", 4096, {377, 233}},
-                      DistributionTestParams{"03_series_25_page_size_64.records", 64, {21, 13}},
-                      DistributionTestParams{"03_series_60_page_size_64.records", 64, {55, 34}},
-                      DistributionTestParams{"03_series_120_page_size_64.records", 64, {89, 55}},
-                      DistributionTestParams{"fibonacci_series_2584_page_size_4096.records", 4096, {1597, 987}},
-                      DistributionTestParams{"fibonacci_series_4181_page_size_4096.records", 4096, {2584, 1597}}));
+    ::testing::Values(
+        DistributionTestParams{"no_coalescing_series_6_with_2_dummy_page_size_64.records", 64, {5, 3}},
+        DistributionTestParams{"01_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
+        DistributionTestParams{"02_prepared_series_8_coalescing_4_page_size_64.records", 64, {5, 3}},
+        DistributionTestParams{"prepared_series_5_records_5_page_size_64.records", 64, {3, 2}},
+        DistributionTestParams{"01_series_25_page_size_64.records", 64, {21, 13}},
+        DistributionTestParams{"01_series_60_page_size_64.records", 64, {55, 34}},
+        DistributionTestParams{"01_series_120_page_size_64.records", 64, {89, 55}},
+        DistributionTestParams{"01_series_512_page_size_4096.records", 4096, {377, 233}},
+        DistributionTestParams{"02_series_25_page_size_64.records", 64, {21, 13}},
+        DistributionTestParams{"02_series_60_page_size_64.records", 64, {55, 34}},
+        DistributionTestParams{"02_series_120_page_size_64.records", 64, {89, 55}},
+        DistributionTestParams{"02_series_512_page_size_4096.records", 4096, {377, 233}},
+        DistributionTestParams{"03_series_25_page_size_64.records", 64, {21, 13}},
+        DistributionTestParams{"03_series_60_page_size_64.records", 64, {55, 34}},
+        DistributionTestParams{"03_series_120_page_size_64.records", 64, {89, 55}},
+        DistributionTestParams{"fibonacci_series_2584_page_size_4096.records", 4096, {1597, 987}},
+        DistributionTestParams{"fibonacci_series_4181_page_size_4096.records", 4096, {2584, 1597}}));
 
 TEST_P(DistributionTest, sunny_scenario_ReturnTapesInDescendingOrder)
 {
@@ -91,15 +111,16 @@ struct DummySeriesDataDefinition
 
 class DummySeriesDistributionTest : public ::testing::TestWithParam<DummySeriesDataDefinition>
 {
-  public:
+   public:
     DummySeriesDistributionTest()
-        : tape_path_(TestConfig::GetResourcePath() + GetParam().path), page_size_(GetParam().page_size),
+        : tape_path_(TestConfig::GetResourcePath() + GetParam().path),
+          page_size_(GetParam().page_size),
           expected_dummy_series_(GetParam().expected_dummy_series)
     {
         fmt::print("[{:^10}] {}\n", "TAPE PATH", tape_path_);
     }
 
-  protected:
+   protected:
     const std::string tape_path_;
     const int page_size_;
     const std::vector<int> expected_dummy_series_;
