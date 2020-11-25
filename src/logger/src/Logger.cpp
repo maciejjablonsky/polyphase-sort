@@ -15,13 +15,13 @@ LoggerImpl::LoggerImpl(const std::string_view output_path) : output_stream_(outp
 
 void LoggerImpl::Write(const std::string& message)
 {
-    AppendTimestamp();
+    //AppendTimestamp();
     output_stream_ << message << '\n';
 }
 
 void LoggerImpl::Write(std::string_view message)
 {
-    AppendTimestamp();
+    //AppendTimestamp();
     output_stream_.write(message.data(), message.size());
     output_stream_ << '\n';
 }

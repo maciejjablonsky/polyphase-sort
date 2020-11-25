@@ -39,7 +39,7 @@ void Merger::operator()()
 #ifdef ENABLE_PRINT
         [&]() {
             TapeReader tape(tapes.back().get().file_path, page_size_);
-            fmt::print("Phase number {:02} | Tape content:\n", phase_number);
+            fmt::print("Phase number {:02} | Tape content:\n", phase_number++);
             for (int i = 0; const auto& record : tape)
             {
                 fmt::print("{:<5} ", record.creation_time);
