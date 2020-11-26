@@ -8,7 +8,7 @@
 #include <fstream>
 #include <logger/Logger.hpp>
 
-
+#undef ENABLE_PRINT
 namespace
 {
 std::string replace(std::string& str, const std::string& from, const std::string& to)

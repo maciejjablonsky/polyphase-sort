@@ -1,0 +1,5 @@
+set(SOURCES main.cpp App.hpp App.cpp)
+add_executable(polyphase-sort-app ${SOURCES})
+target_link_libraries(polyphase-sort-app tape sorter logger common)
+set_target_properties(polyphase-sort-app PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
+set_target_properties(polyphase-sort-app PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
