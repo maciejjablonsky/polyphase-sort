@@ -9,11 +9,14 @@
 #include <Merger.hpp>
 #include <fstream>
 #include <logger/Logger.hpp>
+#include <cstdlib>
+#include <ctime>
 
 template <typename T>
 std::optional<T> get_optional_argument_value(const std::vector<std::string_view>& argv,
                                              std::string_view command)
 {
+    std::srand(std::time(NULL));
     auto command_iter = std::find(argv.begin(), argv.end(), command);
     if (command_iter == argv.end() || command_iter + 1 == argv.end())
     {
@@ -66,7 +69,7 @@ App::App(const int argc, const char* argv[]) : argv_{argv + 1, argv + argc}
 void App::PrintUsage() const
 {
 
-    fmt::print("Usage: polyphase-sort-app [{} <path> | {}] {}[{} <page size>]\n", INPUT_FILE_COMMAND,
+    fmt::print("Usage: polyphase-sort-app [{} <path> | {}] {}[{} <page size>] {}\n", INPUT_FILE_COMMAND,
                INPUT_KEYBOARD_COMMAND,
 #ifdef ENABLE_LOGGING
                fmt::format("[{} <log output path>] ", LOG_OUTPUT_COMMAND)
@@ -74,7 +77,7 @@ void App::PrintUsage() const
                ""
 #endif  // ENABLE_LOGGING
                    ,
-               PAGE_SIZE_COMMAND);
+               PAGE_SIZE_COMMAND, DISPLAY_SORTED_COMAND);
 }
 
 void App::Run()
@@ -91,7 +94,11 @@ void App::Run()
     std::string input_tape = GetInputPath();
     Distributor distributor(input_tape, page_size_);
     auto distributed_tapes = distributor();
-
+    fmt::print("Overall number of series {}\n", distributed_tapes[0].series + distributed_tapes[1].series);
+    fmt::print("Longer tape | series = {} | dummy_series = {}\n", distributed_tapes[0].series,
+               distributed_tapes[0].dummy_series);
+    fmt::print("Shorter tape | series = {} | dummy_series = {}\n", distributed_tapes[1].series,
+               distributed_tapes[1].dummy_series);
     std::string_view output_path = "sorted_output_tape.records";
     Merger merger(distributed_tapes, output_path, page_size_);
     merger();
@@ -100,7 +107,7 @@ void App::Run()
     {
         PrintTape({output_path.data(), output_path.size()});
     }
-
+    
 #ifdef ENABLE_LOGGING
     ParseLog(log_path);
 #endif  // ENABLE_LOGGING
@@ -137,7 +144,7 @@ void App::ParseLog(const std::string& path)
             ++data.merging_phases;
         }
     }
-    fmt::print("Read operations: {}\nWrite operations: {}\n, Merge phases number: {}\n", data.read_operations,
+    fmt::print("Read operations: {}\nWrite operations: {}\nMerge phases number: {}\n", data.read_operations,
                data.write_operations, data.merging_phases);
 }
 
